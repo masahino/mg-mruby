@@ -84,7 +84,8 @@ forwchar(int f, int n)
 		return (backchar(f, -n));
 	while (n--) {
 //		if (curwp->w_doto == llength(curwp->w_dotp)) {
-	     if (curwp->w_doto == utf8_length(ltext(curwp->w_dotp))) {
+	     if (curwp->w_doto == utf8_nlength(ltext(curwp->w_dotp),
+					       llength(curwp->w_dotp))) {
 			curwp->w_dotp = lforw(curwp->w_dotp);
 			if (curwp->w_dotp == curbp->b_headp) {
 				curwp->w_dotp = lback(curwp->w_dotp);

@@ -9,6 +9,7 @@
 #include "def.h"
 #include "kbd.h"
 #include "key.h"
+#include "utf8.h"
 
 #ifndef NO_MACRO
 #include "macro.h"
@@ -404,7 +405,8 @@ selfinsert(int f, int n)
 	/* overwrite mode */
 	if (curbp->b_flag & BFOVERWRITE) {
 		lchange(WFEDIT);
-		while (curwp->w_doto < llength(curwp->w_dotp) && n--)
+//		while (curwp->w_doto < llength(curwp->w_dotp) && n--)
+		while (curwp->w_doto < utf8_length(ltext(curwp->w_dotp)) && n--)
 			lputc(curwp->w_dotp, curwp->w_doto++, c);
 		if (n <= 0)
 			return (TRUE);

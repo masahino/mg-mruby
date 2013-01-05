@@ -747,8 +747,8 @@ uline(int row, struct video *vvp, struct video *pvp)
 	cp1 = &vvp->v_text[0];		/* Compute left match.	 */
 	cp2 = &pvp->v_text[0];
 	while (cp1 != &vvp->v_text[ncol] && cp1[0] == cp2[0]) {
-		++cp1;
-		++cp2;
+	     cp1 += utf8_bytes(cp1, 0);
+	     cp2 += utf8_bytes(cp2, 0);
 	}
 	if (cp1 == &vvp->v_text[ncol])	/* All equal.		 */
 		return;
@@ -770,7 +770,23 @@ uline(int row, struct video *vvp, struct video *pvp)
 			cp5 = cp3;
 	}
 	/* Alcyon hack */
-	ttmove(row, (int) (cp1 - &vvp->v_text[0]));
+	{
+	     int col = 0;
+	     char *tmp1, *tmp2;
+	     int b;
+	     tmp1 = &vvp->v_text[0];
+	     tmp2 = cp1;
+	     while (tmp1 != tmp2) {
+		  b = utf8_bytes(tmp1, 0);
+		  col++;
+		  if (b > 1) {
+		       col++;
+		  }
+		  tmp1 += b;
+	     }
+	     ttmove(row, col);
+	}
+//	ttmove(row, (int) (cp1 - &vvp->v_text[0]));
 #ifdef	STANDOUT_GLITCH
 	if (vvp->v_color != CTEXT && magic_cookie_glitch > 0) {
 		if (cp1 < &vvp->v_text[magic_cookie_glitch])

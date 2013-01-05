@@ -19,6 +19,7 @@
  */
 
 #include "def.h"
+#include "utf8.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -237,6 +238,7 @@ linsert(int n, int c)
 	RSIZE	 i;
 	int	 doto;
 	int s;
+	int line_pos, char_count;
 
 	if (!n)
 		return (TRUE);
@@ -295,13 +297,24 @@ linsert(int n, int c)
 			return (FALSE);
 	}
 	lp1->l_used += n;
-	if (lp1->l_used != n)
-		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
-		    lp1->l_used - n - doto);
+	line_pos = 0;
+	char_count = 0;
+	while (char_count < doto) {
+		line_pos += utf8_bytes(ltext(lp1), line_pos);
+		char_count++;
+	}
+
+	if (lp1->l_used != n) {
+		memmove(&lp1->l_text[line_pos + n], 
+			&lp1->l_text[line_pos],
+			lp1->l_used - n - line_pos);
+//		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
+//		    lp1->l_used - n - doto);
+	}
 
 	/* Add the characters */
 	for (i = 0; i < n; ++i)
-		lp1->l_text[doto + i] = c;
+		lp1->l_text[line_pos + i] = c;
 	for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 		if (wp->w_dotp == lp1) {
 			if (wp == curwp || wp->w_doto > doto)
@@ -427,6 +440,8 @@ ldelete(RSIZE n, int kflag)
 	int		 end;
 	int		 s;
 	int		 rval = FALSE;
+	int              start_byte = 0;
+	int              del_bytes = n;
 
 	if ((s = checkdirty(curbp)) != TRUE)
 		return (s);
@@ -448,10 +463,18 @@ ldelete(RSIZE n, int kflag)
 		if (dotp == curbp->b_headp)
 			goto out;
 		/* Size of the chunk */
-		chunk = dotp->l_used - doto;
+		{
+		     int i;
+		     for (i = 0; i < doto; i++) {
+			  start_byte += utf8_bytes(ltext(dotp), start_byte);
+		     }
+		     del_bytes = utf8_bytes(ltext(dotp), start_byte);
+		}
+		chunk = utf8_length(ltext(dotp)) - doto;
+//		chunk = dotp->l_used - doto;
 
 		if (chunk > n)
-			chunk = n;
+    		        chunk = n;
 		/* End of line, merge */
 		if (chunk == 0) {
 			if (dotp == blastlp(curbp))
@@ -465,14 +488,16 @@ ldelete(RSIZE n, int kflag)
 		}
 		lchange(WFEDIT);
 		/* Scrunch text */
-		cp1 = &dotp->l_text[doto];
+//		cp1 = &dotp->l_text[doto];
+		cp1 = &dotp->l_text[start_byte];
 		memcpy(&sv[end], cp1, chunk);
 		end += chunk;
 		sv[end] = '\0';
-		for (cp2 = cp1 + chunk; cp2 < &dotp->l_text[dotp->l_used];
+		for (cp2 = cp1 + del_bytes; cp2 < &dotp->l_text[dotp->l_used];
 		    cp2++)
 			*cp1++ = *cp2;
-		dotp->l_used -= (int)chunk;
+//		dotp->l_used -= (int)chunk;
+		dotp->l_used -= del_bytes;
 		for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 			if (wp->w_dotp == dotp && wp->w_doto >= doto) {
 				/* NOSTRICT */
