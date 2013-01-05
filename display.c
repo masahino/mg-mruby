@@ -12,6 +12,7 @@
  */
 #include "def.h"
 #include "kbd.h"
+#include "utf8.h"
 
 #include <ctype.h>
 
@@ -320,14 +321,18 @@ vtputc(int c)
 	} else if (ISCTRL(c)) {
 		vtputc('^');
 		vtputc(CCHR(c));
-	} else if (isprint(c))
+//	} else if (isprint(c))
+	} else {
 		vp->v_text[vtcol++] = c;
+	}
+/*
 	else {
 		char bf[5];
 
 		snprintf(bf, sizeof(bf), "\\%o", c);
 		vtputs(bf);
 	}
+*/
 }
 
 /*
@@ -378,6 +383,37 @@ vteeol(void)
 		vp->v_text[vtcol++] = ' ';
 }
 
+static int get_curcol(struct line *lp, int offset)
+{
+     int i = 0;
+     int line_pos = 0;
+     int bytes_of_char = 0;
+     int curcol = 0;
+     unsigned char c;
+
+     for (i = 0; i < offset; i++) {
+	  c = lgetc(lp, line_pos);
+	  bytes_of_char = utf8_bytes(lp->l_text, line_pos);
+	  line_pos += bytes_of_char;
+	  if (c == '\t'
+#ifdef	NOTAB
+	      && !(curbp->b_flag & BFNOTAB)
+#endif
+	       ) {
+	       curcol |= 0x07;
+	       curcol++;
+	  } else if (ISCTRL(c) != FALSE)
+			curcol += 2;
+	  else {
+	       curcol++;
+	       if (bytes_of_char > 1) {
+		    curcol++;
+	       }
+	  }
+     }
+     return curcol;
+}
+
 /*
  * Make sure that the display is
  * right. This is a three part process. First,
@@ -394,7 +430,8 @@ update(void)
 	struct mgwin	*wp;
 	struct video	*vp1;
 	struct video	*vp2;
-	int	 c, i, j;
+//	int	 c, i, j;
+	int      i, j;
 	int	 hflag;
 	int	 currow, curcol;
 	int	 offs, size;
@@ -498,28 +535,7 @@ update(void)
 		++currow;
 		lp = lforw(lp);
 	}
-	curcol = 0;
-	i = 0;
-	while (i < curwp->w_doto) {
-		c = lgetc(lp, i++);
-		if (c == '\t'
-#ifdef	NOTAB
-		    && !(curbp->b_flag & BFNOTAB)
-#endif
-			) {
-			curcol |= 0x07;
-			curcol++;
-		} else if (ISCTRL(c) != FALSE)
-			curcol += 2;
-		else if (isprint(c))
-			curcol++;
-		else {
-			char bf[5];
-
-			snprintf(bf, sizeof(bf), "\\%o", c);
-			curcol += strlen(bf);
-		}
-	}
+	curcol = get_curcol(lp, curwp->w_doto);
 	if (curcol >= ncol - 1) {	/* extended line. */
 		/* flag we are extended and changed */
 		vscreen[currow]->v_flag |= VFEXT | VFCHG;

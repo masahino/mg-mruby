@@ -8,3 +8,4 @@
 #define MAXLOGNAME LOGIN_NAME_MAX
 #endif
 #define HAVE_ARC4RANDOM
+#define HAVE_NOSTRTONUM
