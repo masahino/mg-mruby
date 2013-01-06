@@ -16,6 +16,13 @@
 
 #include <err.h>
 
+#ifdef MRUBY
+#include <mruby.h>
+#include <mruby/proc.h>
+#include <mruby/compile.h>
+#include "mrb_mg.h"
+#endif /* MRUBY */
+
 int		 thisflag;			/* flags, this command	*/
 int		 lastflag;			/* flags, last command	*/
 int		 curgoal;			/* goal column		*/
@@ -30,6 +37,10 @@ static void	 edinit(PF);
 static void usage(void);
 
 extern char	*__progname;
+
+#ifdef MRUBY
+extern *mrb;
+#endif /* MRUBY */
 
 static void
 usage()
@@ -47,6 +58,11 @@ main(int argc, char **argv)
 	int	 o, i, nfiles;
 	int	 nobackups = 0;
 	struct buffer *bp;
+
+#ifdef MRUBY
+	mrb = mrb_open();
+	mrb_mg_init();
+#endif /* MRUBY */
 
 	while ((o = getopt(argc, argv, "nf:")) != -1)
 		switch (o) {
@@ -102,8 +118,13 @@ main(int argc, char **argv)
 
 #ifndef NO_STARTUP
 	/* user startup file */
+#ifdef MRUBY
+	if ((cp = startupfile("mrb")) != NULL)
+		mrb_load(cp);
+#else
 	if ((cp = startupfile(NULL)) != NULL)
 		(void)load(cp);
+#endif /* MRUBY */
 #endif	/* !NO_STARTUP */
 
 	/*

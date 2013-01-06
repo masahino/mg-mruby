@@ -15,8 +15,10 @@ mandir=		$(prefix)/man
 
 
 CC=		gcc
-CFLAGS?=	-O2 -pipe
-CFLAGS+=	-g -Wall -Werror
+#CFLAGS?=	-O2 -pipe
+CFLAGS?=	-pipe
+#CFLAGS+=	-g -Wall -Werror
+CFLAGS+=	-g -Wall
 LIBS= 		-lncurses
 
 INSTALL=	/usr/bin/install
@@ -54,6 +56,7 @@ OBJS= 	autoexec.o \
 	ttyio.o \
 	ttykbd.o \
 	undo.o \
+	utf8.o \
 	version.o \
 	window.o \
 	word.o \

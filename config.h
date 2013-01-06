@@ -9,3 +9,4 @@
 #endif
 #define HAVE_ARC4RANDOM
 #define HAVE_NOSTRTONUM
+#define MRUBY
