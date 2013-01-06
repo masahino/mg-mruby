@@ -1,4 +1,5 @@
 #include <string.h>
+#include "def.h"
 #include "utf8.h"
 
 int utf8_bytes(char *line, int index)
@@ -33,3 +34,21 @@ int utf8_length(char *line)
 {
      return utf8_nlength(line, strlen(line));
 }
+
+int utf8_cmp(char *str1, int index1, char *str2, int index2)
+{
+     int s1_bytes = utf8_bytes(str1, index1);
+     int s2_bytes = utf8_bytes(str2, index2);
+     int i;
+
+     if (s1_bytes != s2_bytes) {
+	  return FALSE;
+     }
+     for (i = 0; i < s1_bytes; i++) {
+	  if (str1[index1++] != str2[index2++]) {
+	       return FALSE;
+	  }
+     }
+     return TRUE;
+}
+     

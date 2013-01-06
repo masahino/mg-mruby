@@ -470,7 +470,7 @@ ldelete(RSIZE n, int kflag)
 		     }
 		     del_bytes = utf8_bytes(ltext(dotp), start_byte);
 		}
-		chunk = utf8_length(ltext(dotp)) - doto;
+		chunk = utf8_nlength(ltext(dotp), llength(dotp)) - doto;
 //		chunk = dotp->l_used - doto;
 
 		if (chunk > n)

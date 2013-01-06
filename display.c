@@ -746,7 +746,8 @@ uline(int row, struct video *vvp, struct video *pvp)
 	}
 	cp1 = &vvp->v_text[0];		/* Compute left match.	 */
 	cp2 = &pvp->v_text[0];
-	while (cp1 != &vvp->v_text[ncol] && cp1[0] == cp2[0]) {
+//	while (cp1 != &vvp->v_text[ncol] && cp1[0] == cp2[0]) {
+	while (cp1 != &vvp->v_text[ncol] && utf8_cmp(cp1, 0, cp2, 0) == TRUE) {
 	     cp1 += utf8_bytes(cp1, 0);
 	     cp2 += utf8_bytes(cp2, 0);
 	}
