@@ -144,6 +144,7 @@ linsert_str(const char *s, int n)
 	struct mgwin	*wp;
 	RSIZE	 i;
 	int	 doto, k;
+	int      pos;
 
 	if ((k = checkdirty(curbp)) != TRUE)
 		return (k);
@@ -200,13 +201,17 @@ linsert_str(const char *s, int n)
 			return (FALSE);
 	}
 	lp1->l_used += n;
+	pos = utf8_bytes(ltext(lp1), 0, doto);
 	if (lp1->l_used != n)
-		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
-		    lp1->l_used - n - doto);
+//		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
+//		    lp1->l_used - n - doto);
+		memmove(&lp1->l_text[pos + n], &lp1->l_text[pos],
+		    lp1->l_used - n - pos);
 
 	/* Add the characters */
 	for (i = 0; i < n; ++i)
-		lp1->l_text[doto + i] = s[i];
+//		lp1->l_text[doto + i] = s[i];
+		lp1->l_text[pos + i] = s[i];
 	for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 		if (wp->w_dotp == lp1) {
 			if (wp == curwp || wp->w_doto > doto)
@@ -300,8 +305,8 @@ linsert(int n, int c)
 	line_pos = 0;
 	char_count = 0;
 	while (char_count < doto) {
-		line_pos += utf8_bytes(ltext(lp1), line_pos);
-		char_count++;
+	     line_pos += utf8_bytes(ltext(lp1), line_pos, 1);
+	     char_count++;
 	}
 
 	if (lp1->l_used != n) {
@@ -466,9 +471,9 @@ ldelete(RSIZE n, int kflag)
 		{
 		     int i;
 		     for (i = 0; i < doto; i++) {
-			  start_byte += utf8_bytes(ltext(dotp), start_byte);
+			  start_byte += utf8_bytes(ltext(dotp), start_byte, 1);
 		     }
-		     del_bytes = utf8_bytes(ltext(dotp), start_byte);
+		     del_bytes = utf8_bytes(ltext(dotp), start_byte, 1);
 		}
 		chunk = utf8_nlength(ltext(dotp), llength(dotp)) - doto;
 //		chunk = dotp->l_used - doto;

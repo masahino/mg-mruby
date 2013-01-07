@@ -393,7 +393,7 @@ static int get_curcol(struct line *lp, int offset)
 
      for (i = 0; i < offset; i++) {
 	  c = lgetc(lp, line_pos);
-	  bytes_of_char = utf8_bytes(lp->l_text, line_pos);
+	  bytes_of_char = utf8_bytes(lp->l_text, line_pos, 1);
 	  line_pos += bytes_of_char;
 	  if (c == '\t'
 #ifdef	NOTAB
@@ -748,8 +748,8 @@ uline(int row, struct video *vvp, struct video *pvp)
 	cp2 = &pvp->v_text[0];
 //	while (cp1 != &vvp->v_text[ncol] && cp1[0] == cp2[0]) {
 	while (cp1 != &vvp->v_text[ncol] && utf8_cmp(cp1, 0, cp2, 0) == TRUE) {
-	     cp1 += utf8_bytes(cp1, 0);
-	     cp2 += utf8_bytes(cp2, 0);
+	     cp1 += utf8_bytes(cp1, 0, 1);
+	     cp2 += utf8_bytes(cp2, 0, 1);
 	}
 	if (cp1 == &vvp->v_text[ncol])	/* All equal.		 */
 		return;
@@ -778,7 +778,7 @@ uline(int row, struct video *vvp, struct video *pvp)
 	     tmp1 = &vvp->v_text[0];
 	     tmp2 = cp1;
 	     while (tmp1 != tmp2) {
-		  b = utf8_bytes(tmp1, 0);
+		  b = utf8_bytes(tmp1, 0, 1);
 		  col++;
 		  if (b > 1) {
 		       col++;

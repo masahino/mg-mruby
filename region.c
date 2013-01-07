@@ -10,6 +10,7 @@
  */
 
 #include "def.h"
+#include "utf8.h"
 
 static	int	getregion(struct region *);
 static	int	setsize(struct region *, RSIZE);
@@ -336,10 +337,12 @@ region_get_data(struct region *reg, char *buf, int len)
 {
 	int	 i, off;
 	struct line	*lp;
+	int bytes;
 
-	off = reg->r_offset;
 	lp = reg->r_linep;
-	for (i = 0; i < len; i++) {
+	off = utf8_bytes(ltext(lp), 0, reg->r_offset);
+	bytes = utf8_bytes(ltext(lp), 0, reg->r_offset + len) - off;
+	for (i = 0; i < bytes; i++) {
 		if (off == llength(lp)) {
 			lp = lforw(lp);
 			if (lp == curbp->b_headp)
@@ -364,6 +367,6 @@ region_put_data(const char *buf, int len)
 		if (buf[i] == '\n')
 			lnewline();
 		else
-			linsert(1, buf[i]);
+		     linsert_str(buf, strlen(buf));
 	}
 }
