@@ -12,7 +12,9 @@
  * current buffer framing bad, are hard.
  */
 #include "def.h"
+#ifdef UTF8
 #include "utf8.h"
+#endif /* UTF8 */
 
 #include <ctype.h>
 
@@ -65,8 +67,11 @@ backchar(int f, int n)
 int
 gotoeol(int f, int n)
 {
+#ifdef UTF8
      curwp->w_doto = utf8_length(ltext(curwp->w_dotp));
-//	curwp->w_doto = llength(curwp->w_dotp);
+#else
+	curwp->w_doto = llength(curwp->w_dotp);
+#endif /* UTF8 */
 	return (TRUE);
 }
 
@@ -83,9 +88,12 @@ forwchar(int f, int n)
 	if (n < 0)
 		return (backchar(f, -n));
 	while (n--) {
-//		if (curwp->w_doto == llength(curwp->w_dotp)) {
+#ifdef UTF8
 	     if (curwp->w_doto == utf8_nlength(ltext(curwp->w_dotp),
 					       llength(curwp->w_dotp))) {
+#else
+		if (curwp->w_doto == llength(curwp->w_dotp)) {
+#endif /* UTF8 */
 			curwp->w_dotp = lforw(curwp->w_dotp);
 			if (curwp->w_dotp == curbp->b_headp) {
 				curwp->w_dotp = lback(curwp->w_dotp);

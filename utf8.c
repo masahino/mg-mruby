@@ -9,6 +9,9 @@ int utf8_bytes(char *line, int index, int counts)
      int bytes = 0;
      int i;
 
+     if (line == NULL) {
+	  return 0;
+     }
      c = line[index];
 
      for (i = 0; i < counts; i++) {
@@ -34,6 +37,10 @@ int utf8_nlength(char *line, int size)
 {
      int num_of_char = 0;
      int i = 0;
+     
+     if (line == NULL) {
+	  return 0;
+     }
      while (i < size) {
 	  i += utf8_bytes(line, i, 1);
 	  num_of_char++;

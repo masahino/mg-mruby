@@ -19,7 +19,9 @@
  */
 
 #include "def.h"
+#ifdef UTF8
 #include "utf8.h"
+#endif /* UTF8 */
 
 #include <stdlib.h>
 #include <string.h>
@@ -144,7 +146,9 @@ linsert_str(const char *s, int n)
 	struct mgwin	*wp;
 	RSIZE	 i;
 	int	 doto, k;
+#ifdef UTF8
 	int      pos;
+#endif /* UTF8 */
 
 	if ((k = checkdirty(curbp)) != TRUE)
 		return (k);
@@ -201,17 +205,25 @@ linsert_str(const char *s, int n)
 			return (FALSE);
 	}
 	lp1->l_used += n;
+#ifdef UTF8
 	pos = utf8_bytes(ltext(lp1), 0, doto);
+#endif /* UTF8 */
 	if (lp1->l_used != n)
-//		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
-//		    lp1->l_used - n - doto);
+#ifdef UTF8
 		memmove(&lp1->l_text[pos + n], &lp1->l_text[pos],
 		    lp1->l_used - n - pos);
+#else 
+		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
+		    lp1->l_used - n - doto);
+#endif /* UTF8 */
 
 	/* Add the characters */
 	for (i = 0; i < n; ++i)
-//		lp1->l_text[doto + i] = s[i];
+#ifdef UTF8
 		lp1->l_text[pos + i] = s[i];
+#else
+		lp1->l_text[doto + i] = s[i];
+#endif /* UTF8 */
 	for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 		if (wp->w_dotp == lp1) {
 			if (wp == curwp || wp->w_doto > doto)
@@ -243,7 +255,9 @@ linsert(int n, int c)
 	RSIZE	 i;
 	int	 doto;
 	int s;
+#ifdef UTF8
 	int line_pos, char_count;
+#endif 
 
 	if (!n)
 		return (TRUE);
@@ -302,24 +316,31 @@ linsert(int n, int c)
 			return (FALSE);
 	}
 	lp1->l_used += n;
+#ifdef UTF8
 	line_pos = 0;
 	char_count = 0;
 	while (char_count < doto) {
 	     line_pos += utf8_bytes(ltext(lp1), line_pos, 1);
 	     char_count++;
 	}
-
 	if (lp1->l_used != n) {
 		memmove(&lp1->l_text[line_pos + n], 
 			&lp1->l_text[line_pos],
 			lp1->l_used - n - line_pos);
-//		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
-//		    lp1->l_used - n - doto);
 	}
 
+#else
+	if (lp1->l_used != n)
+		memmove(&lp1->l_text[doto + n], &lp1->l_text[doto],
+		    lp1->l_used - n - doto);
+#endif /* UTF8 */
 	/* Add the characters */
 	for (i = 0; i < n; ++i)
+#ifdef UTF8
 		lp1->l_text[line_pos + i] = c;
+#else
+		lp1->l_text[doto + i] = c;
+#endif /* UTF8 */
 	for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 		if (wp->w_dotp == lp1) {
 			if (wp == curwp || wp->w_doto > doto)
@@ -445,8 +466,10 @@ ldelete(RSIZE n, int kflag)
 	int		 end;
 	int		 s;
 	int		 rval = FALSE;
+#ifdef UTF8
 	int              start_byte = 0;
 	int              del_bytes = n;
+#endif /* UTF8 */
 
 	if ((s = checkdirty(curbp)) != TRUE)
 		return (s);
@@ -468,6 +491,7 @@ ldelete(RSIZE n, int kflag)
 		if (dotp == curbp->b_headp)
 			goto out;
 		/* Size of the chunk */
+#ifdef UTF8
 		{
 		     int i;
 		     for (i = 0; i < doto; i++) {
@@ -476,10 +500,12 @@ ldelete(RSIZE n, int kflag)
 		     del_bytes = utf8_bytes(ltext(dotp), start_byte, 1);
 		}
 		chunk = utf8_nlength(ltext(dotp), llength(dotp)) - doto;
-//		chunk = dotp->l_used - doto;
+#else
+		chunk = dotp->l_used - doto;
+#endif /* UTF8 */
 
 		if (chunk > n)
-    		        chunk = n;
+			chunk = n;
 		/* End of line, merge */
 		if (chunk == 0) {
 			if (dotp == blastlp(curbp))
@@ -493,16 +519,26 @@ ldelete(RSIZE n, int kflag)
 		}
 		lchange(WFEDIT);
 		/* Scrunch text */
-//		cp1 = &dotp->l_text[doto];
+#ifdef UTF8
 		cp1 = &dotp->l_text[start_byte];
+#else
+		cp1 = &dotp->l_text[doto];
+#endif /* UTF8 */
 		memcpy(&sv[end], cp1, chunk);
 		end += chunk;
 		sv[end] = '\0';
+#ifdef UTF8
 		for (cp2 = cp1 + del_bytes; cp2 < &dotp->l_text[dotp->l_used];
+#else
+		for (cp2 = cp1 + chunk; cp2 < &dotp->l_text[dotp->l_used];
+#endif /* UTF8 */
 		    cp2++)
 			*cp1++ = *cp2;
-//		dotp->l_used -= (int)chunk;
+#ifdef UTF8
 		dotp->l_used -= del_bytes;
+#else
+		dotp->l_used -= (int)chunk;
+#endif /* UTF8 */
 		for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 			if (wp->w_dotp == dotp && wp->w_doto >= doto) {
 				/* NOSTRICT */

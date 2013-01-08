@@ -12,7 +12,9 @@
  */
 #include "def.h"
 #include "kbd.h"
+#ifdef UTF8
 #include "utf8.h"
+#endif /* UTF8 */
 
 #include <ctype.h>
 
@@ -321,18 +323,20 @@ vtputc(int c)
 	} else if (ISCTRL(c)) {
 		vtputc('^');
 		vtputc(CCHR(c));
-//	} else if (isprint(c))
-	} else {
+#ifdef UTF8
+	} else
+#else
+	} else if (isprint(c))
+#endif /* UTF8 */
 		vp->v_text[vtcol++] = c;
-	}
-/*
+#ifndef UTF8
 	else {
 		char bf[5];
 
 		snprintf(bf, sizeof(bf), "\\%o", c);
 		vtputs(bf);
 	}
-*/
+#endif /* UTF8 */
 }
 
 /*
@@ -383,6 +387,7 @@ vteeol(void)
 		vp->v_text[vtcol++] = ' ';
 }
 
+#ifdef UTF8
 static int get_curcol(struct line *lp, int offset)
 {
      int i = 0;
@@ -413,6 +418,7 @@ static int get_curcol(struct line *lp, int offset)
      }
      return curcol;
 }
+#endif /* UTF8 */
 
 /*
  * Make sure that the display is
@@ -430,8 +436,11 @@ update(void)
 	struct mgwin	*wp;
 	struct video	*vp1;
 	struct video	*vp2;
-//	int	 c, i, j;
+#ifdef UTF8
 	int      i, j;
+#else
+	int	 c, i, j;
+#endif /* UTF8 */
 	int	 hflag;
 	int	 currow, curcol;
 	int	 offs, size;
@@ -535,7 +544,32 @@ update(void)
 		++currow;
 		lp = lforw(lp);
 	}
+#ifdef UTF8
 	curcol = get_curcol(lp, curwp->w_doto);
+#else
+	curcol = 0;
+	i = 0;
+	while (i < curwp->w_doto) {
+		c = lgetc(lp, i++);
+		if (c == '\t'
+#ifdef	NOTAB
+		    && !(curbp->b_flag & BFNOTAB)
+#endif
+			) {
+			curcol |= 0x07;
+			curcol++;
+		} else if (ISCTRL(c) != FALSE)
+			curcol += 2;
+		else if (isprint(c))
+			curcol++;
+		else {
+			char bf[5];
+
+			snprintf(bf, sizeof(bf), "\\%o", c);
+			curcol += strlen(bf);
+		}
+	}
+#endif /* UTF8 */
 	if (curcol >= ncol - 1) {	/* extended line. */
 		/* flag we are extended and changed */
 		vscreen[currow]->v_flag |= VFEXT | VFCHG;
@@ -746,10 +780,15 @@ uline(int row, struct video *vvp, struct video *pvp)
 	}
 	cp1 = &vvp->v_text[0];		/* Compute left match.	 */
 	cp2 = &pvp->v_text[0];
-//	while (cp1 != &vvp->v_text[ncol] && cp1[0] == cp2[0]) {
+#ifdef UTF8
 	while (cp1 != &vvp->v_text[ncol] && utf8_cmp(cp1, 0, cp2, 0) == TRUE) {
 	     cp1 += utf8_bytes(cp1, 0, 1);
 	     cp2 += utf8_bytes(cp2, 0, 1);
+#else
+	while (cp1 != &vvp->v_text[ncol] && cp1[0] == cp2[0]) {
+		++cp1;
+		++cp2;
+#endif /* UTF8 */
 	}
 	if (cp1 == &vvp->v_text[ncol])	/* All equal.		 */
 		return;
@@ -771,6 +810,7 @@ uline(int row, struct video *vvp, struct video *pvp)
 			cp5 = cp3;
 	}
 	/* Alcyon hack */
+#ifdef UTF8
 	{
 	     int col = 0;
 	     char *tmp1, *tmp2;
@@ -787,7 +827,9 @@ uline(int row, struct video *vvp, struct video *pvp)
 	     }
 	     ttmove(row, col);
 	}
-//	ttmove(row, (int) (cp1 - &vvp->v_text[0]));
+#else
+	ttmove(row, (int) (cp1 - &vvp->v_text[0]));
+#endif /* UTF8 */
 #ifdef	STANDOUT_GLITCH
 	if (vvp->v_color != CTEXT && magic_cookie_glitch > 0) {
 		if (cp1 < &vvp->v_text[magic_cookie_glitch])

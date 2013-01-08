@@ -10,7 +10,9 @@
  */
 
 #include "def.h"
+#ifdef UTF8
 #include "utf8.h"
+#endif /* UTF8 */
 
 static	int	getregion(struct region *);
 static	int	setsize(struct region *, RSIZE);
@@ -337,12 +339,21 @@ region_get_data(struct region *reg, char *buf, int len)
 {
 	int	 i, off;
 	struct line	*lp;
+#ifdef UTF8
 	int bytes;
+#endif /* UTF8 */
 
+#ifndef UTF8
+	off = reg->r_offset;
+#endif /* !UTF8 */
 	lp = reg->r_linep;
+#ifdef UTF8
 	off = utf8_bytes(ltext(lp), 0, reg->r_offset);
 	bytes = utf8_bytes(ltext(lp), 0, reg->r_offset + len) - off;
 	for (i = 0; i < bytes; i++) {
+#else
+	for (i = 0; i < len; i++) {
+#endif /* UTF8 */
 		if (off == llength(lp)) {
 			lp = lforw(lp);
 			if (lp == curbp->b_headp)
@@ -367,6 +378,10 @@ region_put_data(const char *buf, int len)
 		if (buf[i] == '\n')
 			lnewline();
 		else
+#ifdef UTF8
 		     linsert_str(buf, strlen(buf));
+#else
+			linsert(1, buf[i]);
+#endif /* UTF8 */
 	}
 }

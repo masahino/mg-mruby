@@ -228,6 +228,11 @@ if uname -s | grep -q '^CYGWIN' ; then
     extralibs="$extralibs -Wl,--enable-auto-import -Wno-char-subscripts"
 fi
 
+# UTF8
+#add_inc UTF8
+#extraobjs="$extraobjs utf8.o"
+
+# MRUBY
 add_inc MRUBY
 extraflags="$extraflags -I./mruby/include"
 extralibs="$extralibs mruby/lib/libmruby.a"

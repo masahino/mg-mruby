@@ -5,7 +5,9 @@
 
 #include "def.h"
 #include "kbd.h"
+#ifdef UTF8
 #include "utf8.h"
+#endif
 
 #define MAX_FREE_RECORDS	32
 
@@ -301,7 +303,9 @@ undo_add_delete(struct line *lp, int offset, int size, int isreg)
 	struct region	reg;
 	struct	undo_rec *rec;
 	int	pos;
+#ifdef UTF8
 	int     undo_bytes = 0;
+#endif /* UTF8 */
 
 	if (!undo_enable_flag)
 		return (TRUE);
@@ -309,7 +313,9 @@ undo_add_delete(struct line *lp, int offset, int size, int isreg)
 	reg.r_linep = lp;
 	reg.r_size = size;
 	reg.r_offset = offset;
+#ifdef UTF8
 	undo_bytes = utf8_bytes(ltext(lp), 0, size);
+#endif /* UTF8 */
 
 	pos = find_dot(lp, offset);
 
@@ -333,7 +339,11 @@ undo_add_delete(struct line *lp, int offset, int size, int isreg)
 		rec->type = DELETE;
 	memmove(&rec->region, &reg, sizeof(struct region));
 	do {
+#ifdef UTF8
 		rec->content = malloc(undo_bytes + 1);
+#else
+		rec->content = malloc(reg.r_size + 1);
+#endif /* UTF8 */
 	} while ((rec->content == NULL) && drop_oldest_undo_record());
 
 	if (rec->content == NULL)
