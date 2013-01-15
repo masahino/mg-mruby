@@ -28,6 +28,10 @@
 
 #include <ctype.h>
 
+#ifdef MRUBY 
+#include "mrb_mg.h"
+#endif /* MRUBY */
+
 static int	 remap(KEYMAP *, int, PF, KEYMAP *);
 static KEYMAP	*reallocmap(KEYMAP *);
 static void	 fixmap(KEYMAP *, KEYMAP *, KEYMAP *);
@@ -654,7 +658,11 @@ evalfile(int f, int n)
 		return (ABORT);
 	else if (bufp[0] == '\0')
 		return (FALSE);
+#ifdef MRUBY
+	return (mrb_load(fname));
+#else
 	return (load(fname));
+#endif /* MRUBY */
 }
 
 /*

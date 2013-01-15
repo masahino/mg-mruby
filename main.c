@@ -17,9 +17,6 @@
 #include <err.h>
 
 #ifdef MRUBY
-#include <mruby.h>
-#include <mruby/proc.h>
-#include <mruby/compile.h>
 #include "mrb_mg.h"
 #endif /* MRUBY */
 
@@ -37,10 +34,6 @@ static void	 edinit(PF);
 static void usage(void);
 
 extern char	*__progname;
-
-#ifdef MRUBY
-extern *mrb;
-#endif /* MRUBY */
 
 static void
 usage()

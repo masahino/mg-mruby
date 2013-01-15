@@ -1,6 +1,12 @@
 #ifndef MRB_MG_H
 #define MRB_MG_H
 
-void mrb_mruby_mg_init(mrb_state *mrb);
+#include <mruby.h>
+#include <mruby/proc.h>
+#include <mruby/compile.h>
+
+extern mrb_state *mrb;
+
+//void mrb_mg_init(mrb_state *mrb);
 
 #endif
