@@ -29,12 +29,23 @@
 
 #define ISWORD(c)	((cinfo[CHARMASK(c)]&_MG_W)!=0)
 #define ISCTRL(c)	((cinfo[CHARMASK(c)]&_MG_C)!=0)
+#ifndef MRUBY
 #define ISUPPER(c)	((cinfo[CHARMASK(c)]&_MG_U)!=0)
 #define ISLOWER(c)	((cinfo[CHARMASK(c)]&_MG_L)!=0)
+#else
+#define MG_ISUPPER(c)	((cinfo[CHARMASK(c)]&_MG_U)!=0)
+#define MG_ISLOWER(c)	((cinfo[CHARMASK(c)]&_MG_L)!=0)
+#endif /* !MRUBY */
 #define ISEOSP(c)	((cinfo[CHARMASK(c)]&_MG_P)!=0)
+#ifndef MRUBY
 #define	ISDIGIT(c)	((cinfo[CHARMASK(c)]&_MG_D)!=0)
 #define TOUPPER(c)	((c)-0x20)
 #define TOLOWER(c)	((c)+0x20)
+#else
+#define	MG_ISDIGIT(c)	((cinfo[CHARMASK(c)]&_MG_D)!=0)
+#define MG_TOUPPER(c)	((c)-0x20)
+#define MG_TOLOWER(c)	((c)+0x20)
+#endif /* !MRUBY */
 
 /*
  * Generally useful thing for chars

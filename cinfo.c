@@ -135,8 +135,13 @@ getkeyname(char *cp, size_t len, int k)
 			*cp++ = 'C';
 			*cp++ = '-';
 			k = CCHR(k);
+#ifndef MRUBY
 			if (ISUPPER(k))
 				k = TOLOWER(k);
+#else
+			if (MG_ISUPPER(k))
+				k = MG_TOLOWER(k);
+#endif /* !MRUBY */
 		}
 		*cp++ = k;
 		*cp = '\0';

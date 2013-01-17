@@ -21,8 +21,9 @@
 #include "mrb_mg.h"
 #include "mrb_mode.h"
 #include "mrb_funmap.h"
+#include "mrb_keymap.h"
 
-mrb_state *mrb = NULL;
+mrb_state *mrb;
 
 extern int indentmode(int, int);
 extern int makebkfile(int, int);
@@ -64,7 +65,7 @@ mrb_value mrb_s_make_backup_files(mrb_state *mrb, mrb_value self)
 
 mrb_value mrb_s_set_fill_column(mrb_state *mrb, mrb_value self)
 {
-     mrb_value value;
+//     mrb_value value;
 //     mrb_get_args(mrb, "i", &value);
 //     setfillcol(0, mrb_fixnum(value));
      return mrb_nil_value();
@@ -95,10 +96,11 @@ int mrb_load(char *fname)
      return FALSE;
 }
 
-void mrb_mg_init(mrb_state *mrb, mrb_value *self)
+void mrb_mg_init()
 {
     struct RClass *kernel;
 
+    mrb = mrb_open();
 //    mg = mrb_define_class(mrb, "MG", mrb->object_class);
     kernel = mrb_class_get(mrb, "Kernel");
 
@@ -120,9 +122,9 @@ void mrb_mg_init(mrb_state *mrb, mrb_value *self)
     mrb_define_module_function(mrb, kernel, "debug_log", 
 			    mrb_s_debug_log, ARGS_REQ(1));
     
-    mrb_funmap_init();
-    mrb_keymap_init();
-    mrb_mode_init();
+    mrb_funmap_init(mrb);
+    mrb_keymap_init(mrb);
+    mrb_mode_init(mrb);
 //    mrb_gc_arena_restore(mrb, 0);
 }
 

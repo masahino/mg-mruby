@@ -90,8 +90,13 @@ upperword(int f, int n)
 
 		while (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
+#ifndef MRUBY
 			if (ISLOWER(c) != FALSE) {
 				c = TOUPPER(c);
+#else
+			if (MG_ISLOWER(c) != FALSE) {
+				c = MG_TOUPPER(c);
+#endif /* !MRUBY */
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFFULL);
 			}
@@ -131,8 +136,13 @@ lowerword(int f, int n)
 
 		while (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
+#ifndef MRUBY
 			if (ISUPPER(c) != FALSE) {
 				c = TOLOWER(c);
+#else
+			if (MG_ISUPPER(c) != FALSE) {
+				c = MG_TOLOWER(c);
+#endif /* !MRUBY */
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFFULL);
 			}
@@ -175,8 +185,13 @@ capword(int f, int n)
 
 		if (inword() != FALSE) {
 			c = lgetc(curwp->w_dotp, curwp->w_doto);
+#ifndef MRUBY
 			if (ISLOWER(c) != FALSE) {
 				c = TOUPPER(c);
+#else
+			if (MG_ISLOWER(c) != FALSE) {
+				c = MG_TOUPPER(c);
+#endif /* !MRUBY */
 				lputc(curwp->w_dotp, curwp->w_doto, c);
 				lchange(WFFULL);
 			}
@@ -184,8 +199,13 @@ capword(int f, int n)
 				return (TRUE);
 			while (inword() != FALSE) {
 				c = lgetc(curwp->w_dotp, curwp->w_doto);
+#ifndef MRUBY
 				if (ISUPPER(c) != FALSE) {
 					c = TOLOWER(c);
+#else
+				if (MG_ISUPPER(c) != FALSE) {
+					c = MG_TOLOWER(c);
+#endif /* !MRUBY */
 					lputc(curwp->w_dotp, curwp->w_doto, c);
 					lchange(WFFULL);
 				}

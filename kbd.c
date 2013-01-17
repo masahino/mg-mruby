@@ -189,8 +189,13 @@ rescan(int f, int n)
 	int	 md = curbp->b_nmodes;
 
 	for (;;) {
+#ifndef MRUBY
 		if (ISUPPER(key.k_chars[key.k_count - 1])) {
 			c = TOLOWER(key.k_chars[key.k_count - 1]);
+#else
+		if (MG_ISUPPER(key.k_chars[key.k_count - 1])) {
+			c = MG_TOLOWER(key.k_chars[key.k_count - 1]);
+#endif /* !MRUBY */
 			curmap = curbp->b_modes[md]->p_map;
 			for (i = 0; i < key.k_count - 1; i++) {
 				if ((fp = doscan(curmap, (key.k_chars[i]),

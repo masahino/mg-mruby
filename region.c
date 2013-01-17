@@ -123,8 +123,13 @@ lowerregion(int f, int n)
 			loffs = 0;
 		} else {
 			c = lgetc(linep, loffs);
+#ifndef MRUBY
 			if (ISUPPER(c) != FALSE)
 				lputc(linep, loffs, TOLOWER(c));
+#else
+			if (MG_ISUPPER(c) != FALSE)
+				lputc(linep, loffs, MG_TOLOWER(c));
+#endif /* !MRUBY */
 			++loffs;
 		}
 	}
@@ -165,8 +170,13 @@ upperregion(int f, int n)
 			loffs = 0;
 		} else {
 			c = lgetc(linep, loffs);
+#ifndef MRUBY
 			if (ISLOWER(c) != FALSE)
 				lputc(linep, loffs, TOUPPER(c));
+#else
+			if (MG_ISLOWER(c) != FALSE)
+				lputc(linep, loffs, MG_TOUPPER(c));
+#endif /* !MRUBY */
 			++loffs;
 		}
 	}

@@ -309,7 +309,11 @@ isearch(int dir)
 			/* if the search is case insensitive, add to pattern using lowercase */
 			xcase = 0;
 			for (i = 0; pat[i]; i++)
+#ifndef MRUBY
 				if (ISUPPER(CHARMASK(pat[i])))
+#else
+				if (MG_ISUPPER(CHARMASK(pat[i])))
+#endif /* !MRUBY */
 					xcase = 1;
 
 			while (cbo < llength(clp)) {
@@ -322,8 +326,13 @@ isearch(int dir)
 					break;
 				}
 				firstc = 0;
+#ifndef MRUBY
 				if (!xcase && ISUPPER(c))
 					c = TOLOWER(c);
+#else
+				if (!xcase && MG_ISUPPER(c))
+					c = MG_TOLOWER(c);
+#endif /* !MRUBY */
 
 				pat[pptr++] = c;
 				pat[pptr] = '\0';
@@ -681,7 +690,11 @@ forwsrch(void)
 	cbo = curwp->w_doto;
 	nline = curwp->w_dotline;
 	for (i = 0; pat[i]; i++)
+#ifndef MRUBY
 		if (ISUPPER(CHARMASK(pat[i])))
+#else
+		if (MG_ISUPPER(CHARMASK(pat[i])))
+#endif /* !MRUBY */
 			xcase = 1;
 	for (;;) {
 		if (cbo == llength(clp)) {
@@ -742,7 +755,11 @@ backsrch(void)
 	cbo = curwp->w_doto;
 	nline = curwp->w_dotline;
 	for (i = 0; pat[i]; i++)
+#ifndef MRUBY
 		if (ISUPPER(CHARMASK(pat[i])))
+#else
+		if (MG_ISUPPER(CHARMASK(pat[i])))
+#endif /* !MRUBY */
 			xcase = 1;
 	for (;;) {
 		if (cbo == 0) {
@@ -799,10 +816,17 @@ eq(int bc, int pc, int xcase)
 		return (TRUE);
 	if (xcase)
 		return (FALSE);
+#ifndef MRUBY
 	if (ISUPPER(bc))
 		return (TOLOWER(bc) == pc);
 	if (ISUPPER(pc))
 		return (bc == TOLOWER(pc));
+#else
+	if (MG_ISUPPER(bc))
+		return (MG_TOLOWER(bc) == pc);
+	if (MG_ISUPPER(pc))
+		return (bc == MG_TOLOWER(pc));
+#endif /* !MRUBY */
 	return (FALSE);
 }
 

@@ -53,7 +53,7 @@ struct mrb_data_type mrb_map_element_type = {
 
 mrb_value mrb_keymap_initialize(mrb_state *mrb, mrb_value self)
 {
-     mrb_value map_array, mode_name, result;
+     mrb_value map_array, mode_name;
      struct mrb_keymap new_map;
      int i, len;
      
@@ -87,7 +87,7 @@ mrb_value mrb_mape_initialize(mrb_state *mrb, mrb_value self)
      mrb_get_args(mrb, "zzzo", &k_base, &k_num, &k_funcname, &k_prefmap);
      mape.k_base = k_base[0];
      mape.k_num = k_num[0];
-     mape.k_funcp = mrb_mode1;
+//     mape.k_funcp = mrb_mode1;
      mape.k_prefmap = NULL;
      mrb_mape = malloc(sizeof(struct mrb_map_element));
      memcpy(&(mrb_mape->mape), &mape, sizeof(struct map_element));
@@ -98,7 +98,7 @@ mrb_value mrb_mape_initialize(mrb_state *mrb, mrb_value self)
      return self;
 }
 
-void mrb_keymap_init()
+void mrb_keymap_init(mrb_state *mrb)
 {
      struct RClass *keymap, *mape;
      

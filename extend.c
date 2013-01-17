@@ -5,8 +5,8 @@
 /*
  *	Extended (M-X) commands, rebinding, and	startup file processing.
  */
-#include "chrdef.h"
 #include "def.h"
+#include "chrdef.h"
 #include "kbd.h"
 #include "funmap.h"
 
@@ -740,7 +740,11 @@ excline(char *line)
 	if (*line != '\0') {
 		*line++ = '\0';
 		line = skipwhite(line);
+#ifndef MRUBY
 		if (ISDIGIT(*line) || *line == '-') {
+#else
+		if (MG_ISDIGIT(*line) || *line == '-') {
+#endif /* !MRUBY */
 			argp = line;
 			line = parsetoken(line);
 		}
@@ -837,8 +841,13 @@ excline(char *line)
 						 * due to bug in OSK cpp
 						 */
 						c = CHARMASK(*++argp);
+#ifndef MRUBY
 						c = ISLOWER(c) ?
 						    CCHR(TOUPPER(c)) : CCHR(c);
+#else
+						c = MG_ISLOWER(c) ?
+						    CCHR(MG_TOUPPER(c)) : CCHR(c);
+#endif /* !MRUBY */
 						break;
 					case '0':
 					case '1':
@@ -865,7 +874,11 @@ excline(char *line)
 					case 'f':
 					case 'F':
 						c = *++argp - '0';
+#ifndef MRUBY
 						if (ISDIGIT(argp[1])) {
+#else
+						if (MG_ISDIGIT(argp[1])) {
+#endif /* !MRUBY */
 							c *= 10;
 							c += *++argp - '0';
 						}

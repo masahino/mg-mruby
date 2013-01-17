@@ -57,9 +57,15 @@ desckey(int f, int n)
 		}
 		if (funct != rescan)
 			break;
+#ifndef MRUBY
 		if (ISUPPER(key.k_chars[key.k_count - 1])) {
 			funct = doscan(curmap,
 			    TOLOWER(key.k_chars[key.k_count - 1]), &curmap);
+#else
+		if (MG_ISUPPER(key.k_chars[key.k_count - 1])) {
+			funct = doscan(curmap,
+			    MG_TOLOWER(key.k_chars[key.k_count - 1]), &curmap);
+#endif /* !MRUBY */
 			if (funct == NULL) {
 				*pep++ = '-';
 				*pep = '\0';

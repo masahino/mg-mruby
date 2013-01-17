@@ -63,7 +63,7 @@ mrb_value mrb_funmap_add(mrb_state *mrb, mrb_value self)
      return result;
 }
 
-void mrb_funmap_init()
+void mrb_funmap_init(mrb_state *mrb)
 {
      struct RClass *funmap;
      

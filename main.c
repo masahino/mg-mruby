@@ -53,7 +53,7 @@ main(int argc, char **argv)
 	struct buffer *bp;
 
 #ifdef MRUBY
-	mrb = mrb_open();
+//	mrb = mrb_open();
 	mrb_mg_init();
 #endif /* MRUBY */
 
