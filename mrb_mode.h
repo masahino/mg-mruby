@@ -3,18 +3,13 @@
 
 #define MRB_MODE_MAX 10
 
-struct mrb_funmap {
-     mrb_value proc;
-     const char *fn_name;
-     struct mrb_funmap *fn_next;
-};
-
 struct mrb_mode {
      mrb_state *mrb;
      const char *mode_name;
-     PF fn_funct;
-     struct mrb_funmap *funmap;
+     mrb_value callback_h;
+     struct mrb_mode *next;
 };
+
 
 extern void mrb_mode_init(mrb_state *mrb);
 extern int mrb_mode1(int f, int n);
@@ -29,5 +24,6 @@ extern int mrb_mode9(int f, int n);
 extern int mrb_mode10(int f, int n);
 
 extern PF mrb_mode_funcs[];
+extern struct mrb_mode *mrb_modes;
 
 #endif /* MRB_MODE_H */

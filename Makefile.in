@@ -5,7 +5,7 @@
 
 # *sigh* Those debian folks are really tidy on their licenses.
 
-name=		mg
+name=		mrg
 
 prefix=		/usr/local
 bindir=		$(prefix)/bin

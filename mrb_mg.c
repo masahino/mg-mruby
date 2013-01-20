@@ -76,7 +76,7 @@ mrb_value mrb_s_insert(mrb_state *mrb, mrb_value self)
      mrb_value str;
      int ret;
      mrb_get_args(mrb, "S", &str);
-     ret = linsert_str(RSTRING_PTR(str), 1);
+     ret = linsert_str(RSTRING_PTR(str), RSTRING_LEN(str));
      return mrb_fixnum_value(ret);
 }
 
@@ -96,6 +96,15 @@ int mrb_load(char *fname)
      return FALSE;
 }
 
+/* match.c */
+mrb_value mrb_s_showmatch(mrb_state *mrb, mrb_value self)
+{
+     mrb_value f, n;
+     int ret;
+     mrb_get_args(mrb, "oo", &f, &n);
+     ret = showmatch(mrb_fixnum(f), mrb_fixnum(n));
+     return mrb_fixnum_value(ret);
+}
 void mrb_mg_init()
 {
     struct RClass *kernel;
@@ -121,9 +130,15 @@ void mrb_mg_init()
 
     mrb_define_module_function(mrb, kernel, "debug_log", 
 			    mrb_s_debug_log, ARGS_REQ(1));
+
+    /* match.c */
+    mrb_define_module_function(mrb, kernel, "showmatch",
+			       mrb_s_showmatch, ARGS_REQ(2));
     
-    mrb_funmap_init(mrb);
-    mrb_keymap_init(mrb);
+    /* const */
+    mrb_define_const(mrb, kernel, "FFRAND", mrb_fixnum_value(FFRAND));
+//    mrb_funmap_init(mrb);
+//    mrb_keymap_init(mrb);
     mrb_mode_init(mrb);
 //    mrb_gc_arena_restore(mrb, 0);
 }
