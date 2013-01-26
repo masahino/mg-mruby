@@ -202,10 +202,13 @@ static int mrb_mode_callback(int f, int n)
 	  tmp_s = mrb_string_value_ptr(mrb, mrb_ary_entry(keys, i));
 	  if (*tmp_s == key.k_chars[key.k_count -1]) {
 	       mrb_funcall(mrb, mrb_top_self(mrb),
-			   "__send__", 3,
+			   "__send__", 4,
 			   mrb_hash_get(mrb, key_hash, mrb_ary_entry(keys, i)), 
 			   mrb_fixnum_value(f),
-			   mrb_fixnum_value(n));
+			   mrb_fixnum_value(n),
+			   mrb_ary_entry(keys, i)
+		    );
+	       return TRUE;
 
 	  }
      }

@@ -56,7 +56,6 @@ OBJS= 	autoexec.o \
 	ttyio.o \
 	ttykbd.o \
 	undo.o \
-	utf8.o \
 	version.o \
 	window.o \
 	word.o \

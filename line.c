@@ -147,7 +147,7 @@ linsert_str(const char *s, int n)
 	RSIZE	 i;
 	int	 doto, k;
 #ifdef UTF8
-	int      pos;
+	int      pos, chars;
 #endif /* UTF8 */
 
 	if ((k = checkdirty(curbp)) != TRUE)
@@ -161,6 +161,9 @@ linsert_str(const char *s, int n)
 	if (!n)
 		return (TRUE);
 
+#ifdef UTF8
+	chars = utf8_length((char *)s);
+#endif /* UTF8 */
 	lchange(WFFULL);
 
 	/* current line */
@@ -194,7 +197,11 @@ linsert_str(const char *s, int n)
 				wp->w_markp = lp2;
 		}
 		undo_add_insert(lp2, 0, n);
+#ifdef UTF8
+		curwp->w_doto = chars;
+#else
 		curwp->w_doto = n;
+#endif /* UTF8 */
 		return (TRUE);
 	}
 	/* save for later */
@@ -227,11 +234,19 @@ linsert_str(const char *s, int n)
 	for (wp = wheadp; wp != NULL; wp = wp->w_wndp) {
 		if (wp->w_dotp == lp1) {
 			if (wp == curwp || wp->w_doto > doto)
+#ifdef UTF8
+				wp->w_doto += chars;
+#else
 				wp->w_doto += n;
+#endif /* UTF8 */
 		}
 		if (wp->w_markp == lp1) {
 			if (wp->w_marko > doto)
+#ifdef UTF8
+				wp->w_marko += chars;
+#else
 				wp->w_marko += n;
+#endif /* UTF8 */
 		}
 	}
 	undo_add_insert(curwp->w_dotp, doto, n);

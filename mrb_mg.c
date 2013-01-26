@@ -126,7 +126,7 @@ void mrb_mg_init()
 			    mrb_s_set_fill_column, ARGS_REQ(1));
 
     mrb_define_module_function(mrb, kernel, "insert",
-			    mrb_s_insert, ARGS_REQ(1));
+			       mrb_s_insert, ARGS_REQ(1));
 
     mrb_define_module_function(mrb, kernel, "debug_log", 
 			    mrb_s_debug_log, ARGS_REQ(1));
