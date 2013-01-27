@@ -5,6 +5,7 @@
 
 struct mrb_mode {
      mrb_state *mrb;
+     mrb_value mode_obj;
      const char *mode_name;
      mrb_value callback_h;
      struct mrb_mode *next;

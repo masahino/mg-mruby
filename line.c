@@ -383,6 +383,9 @@ lnewline_at(struct line *lp1, int doto)
 	struct line	*lp2;
 	int	 nlen;
 	struct mgwin	*wp;
+#ifdef UTF8
+	int pos;
+#endif /* UTF8 */
 
 	lchange(WFFULL);
 
@@ -413,14 +416,24 @@ lnewline_at(struct line *lp1, int doto)
 	}
 
 	/* length of new part */
+#ifdef UTF8
+	pos = utf8_bytes(lp1->l_text, 0, doto);
+	nlen = llength(lp1) - pos;
+#else
 	nlen = llength(lp1) - doto;
+#endif /* UTF8 */
 
 	/* new second half line */
 	if ((lp2 = lalloc(nlen)) == NULL)
 		return (FALSE);
 	if (nlen != 0)
+#ifdef UTF8
+	     bcopy(&lp1->l_text[pos], &lp2->l_text[0], nlen);
+	lp1->l_used = pos;
+#else
 		bcopy(&lp1->l_text[doto], &lp2->l_text[0], nlen);
 	lp1->l_used = doto;
+#endif
 	lp2->l_bp = lp1;
 	lp2->l_fp = lp1->l_fp;
 	lp1->l_fp = lp2;
@@ -512,7 +525,7 @@ ldelete(RSIZE n, int kflag)
 		     for (i = 0; i < doto; i++) {
 			  start_byte += utf8_bytes(ltext(dotp), start_byte, 1);
 		     }
-		     del_bytes = utf8_bytes(ltext(dotp), start_byte, 1);
+		     del_bytes = utf8_bytes(ltext(dotp), start_byte, n);
 		}
 		chunk = utf8_nlength(ltext(dotp), llength(dotp)) - doto;
 #else
