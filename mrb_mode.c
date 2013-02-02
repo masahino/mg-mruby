@@ -234,27 +234,19 @@ mrb_value mrb_mode_initialize(mrb_state *mrb, mrb_value self)
      mrb_value mode_name;
      struct mrb_mode *mode_data;
 
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
      mode_data = malloc(sizeof(struct mrb_mode));
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
 
      mrb_get_args(mrb, "S", &mode_name);
      // TODO: duplicate check !!
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
 
      mode_data->mrb = mrb;
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
      mode_data->mode_obj = self;
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
      mode_data->mode_name = RSTRING_PTR(mode_name);
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
      mode_data->next = NULL;
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
 
      mrb_iv_set(mrb, self, mrb_intern(mrb, "data"), mrb_obj_value(
 		     Data_Wrap_Struct(mrb, (struct RClass*) &self,
 				      &mrb_mode_data_type, (void*)mode_data)));
-     fprintf(stderr, "%s %d\n", __FILE__, __LINE__);
      return self;
 }
 

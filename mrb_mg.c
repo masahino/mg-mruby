@@ -30,8 +30,10 @@ mrb_value
 mrb_s_debug_log(mrb_state *mrb, mrb_value self)
 {
      mrb_value value;
+     char *cstr;
      mrb_get_args(mrb, "S", &value);
-     fprintf(stderr, "[debug]%s\n", RSTRING_PTR(value));
+     cstr = strndup(RSTRING_PTR(value), RSTRING_LEN(value));
+     fprintf(stderr, "[debug]%s\n", cstr);
      return self;
 }
 

@@ -42,9 +42,7 @@ mrb_value
 mrb_s_delete_backward_char(mrb_state *mrb, mrb_value self)
 {
      mrb_int n_value = 1;
-     int n;
      mrb_get_args(mrb, "|i", &n_value);
-     fprintf (stderr, "n = %d\n", n_value);
      return mrb_fixnum_value(backdel(FFRAND, n_value));
 }
 
@@ -71,9 +69,12 @@ mrb_s_global_set_key(mrb_state *mrb, mrb_value self)
 mrb_value mrb_s_insert(mrb_state *mrb, mrb_value self)
 {
      mrb_value str;
-     int ret;
+     char *cstr;
+     int len, ret;
      mrb_get_args(mrb, "S", &str);
-     ret = linsert_str(RSTRING_PTR(str), RSTRING_LEN(str));
+     len = RSTRING_LEN(str);
+     cstr = strndup(RSTRING_PTR(str), len);
+     ret = linsert_str(cstr, len);
      return mrb_fixnum_value(ret);
 }
 
