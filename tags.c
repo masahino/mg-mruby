@@ -8,7 +8,7 @@
 
 #include <sys/queue.h>
 #include <sys/stat.h>
-#include <sys/tree.h>
+#include "sys_tree.h"
 #include <sys/types.h>
 
 #include <ctype.h>

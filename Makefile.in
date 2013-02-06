@@ -18,20 +18,17 @@ CC=		gcc
 #CFLAGS?=	-O2 -pipe
 CFLAGS?=	-pipe
 #CFLAGS+=	-g -Wall -Werror
-CFLAGS+=	-g -Wall
+CFLAGS+=	-g -Wall -DREGEX
 LIBS= 		-lncurses
 
 INSTALL=	/usr/bin/install
 STRIP=		/usr/bin/strip
 
-
 OBJS= 	autoexec.o \
 	basic.o \
 	buffer.o \
 	cinfo.o \
-	cmode.o \
 	dir.o \
-	dired.o \
 	display.o \
 	echo.o \
 	extend.o \
@@ -61,7 +58,8 @@ OBJS= 	autoexec.o \
 	word.o \
 	yank.o
 
-OBJS+=	grep.o theo.o
+OBJS+=	cmode.o cscope.o dired.o grep.o tags.o theo.o
+
 
 # # Portability stuff.
 CFLAGS+= 	@extraflags@

@@ -34,13 +34,15 @@ esac
 
 cat << EOF > config.h
 #define FKEYS
-#define REGEX
 #define XKEYS
 #ifndef LOGIN_NAME_MAX
-#define MAXLOGNAME _POSIX_LOGIN_NAME_MAX
+#define LOGIN_NAME_MAX _POSIX_LOGIN_NAME_MAX
 #endif
 #ifndef MAXLOGNAME
 #define MAXLOGNAME LOGIN_NAME_MAX
+#endif
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
 #endif
 EOF
 

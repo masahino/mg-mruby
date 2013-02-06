@@ -2,6 +2,8 @@
 
 /* This file is in the public domain. */
 
+#include "config.h"
+
 /*
  *		POSIX system header file
  */
