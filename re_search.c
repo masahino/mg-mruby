@@ -13,9 +13,9 @@
  * them from scratch.
  */
 
+#ifdef REGEX
 #include "def.h"
 
-#ifdef REGEX
 #include <sys/types.h>
 #include <regex.h>
 
@@ -41,41 +41,6 @@ static int	 re_backsrch(void);
 static int	 re_readpattern(char *);
 static int	 killmatches(int);
 static int	 countmatches(int);
-
-#ifdef REG_STARTEND
-#define regexec_new regexec
-#else
-int
-regexec_new(const regex_t *preg, const char *string, size_t nmatch,
-	    regmatch_t pmatch[], int eflags)
-{
-	int	 len, off, error, i;
-	char	*buf;
-
-	off = pmatch[0].rm_so;
-	len = pmatch[0].rm_eo - off;
-
-	buf = malloc(len + 1);
-	if(buf == NULL)
-		panic("Out of memory in regex search code");
-
-	strncpy(buf, string + off, len);
-	*(buf + len) = '\0';
-	error = regexec(preg, buf, nmatch, pmatch, 0);
-	free(buf);
-
-	if (error == 0) {
-		for (i = 0; i <= nmatch; i++) {
-			pmatch[i].rm_so += off;
-			pmatch[i].rm_eo += off;
-		}
-	}
-
-	return error;
-}
-
-#define REG_STARTEND 0
-#endif
 
 /*
  * Search forward.
@@ -156,8 +121,7 @@ re_searchagain(int f, int n)
 
 /* Compiled regex goes here-- changed only when new pattern read */
 static regex_t		re_buff;
-/* re_match is taken in GLIBC regex.h */
-static regmatch_t	regex_match[RE_NMATCH];
+static regmatch_t	re_match[RE_NMATCH];
 
 /*
  * Re-Query Replace.
@@ -188,14 +152,14 @@ retry:
 		update();
 		switch (getkey(FALSE)) {
 		case ' ':
-			plen = regex_match[0].rm_eo - regex_match[0].rm_so;
+			plen = re_match[0].rm_eo - re_match[0].rm_so;
 			if (re_doreplace((RSIZE)plen, news) == FALSE)
 				return (FALSE);
 			rcnt++;
 			break;
 
 		case '.':
-			plen = regex_match[0].rm_eo - regex_match[0].rm_so;
+			plen = re_match[0].rm_eo - re_match[0].rm_so;
 			if (re_doreplace((RSIZE)plen, news) == FALSE)
 				return (FALSE);
 			rcnt++;
@@ -209,7 +173,7 @@ retry:
 			goto stopsearch;
 		case '!':
 			do {
-				plen = regex_match[0].rm_eo - regex_match[0].rm_so;
+				plen = re_match[0].rm_eo - re_match[0].rm_so;
 				if (re_doreplace((RSIZE)plen, news) == FALSE)
 					return (FALSE);
 				rcnt++;
@@ -298,10 +262,10 @@ re_doreplace(RSIZE plen, char *st)
 			} else {
 				if (num >= RE_NMATCH)
 					return (FALSE);
-				k = regex_match[num].rm_eo - regex_match[num].rm_so;
+				k = re_match[num].rm_eo - re_match[num].rm_so;
 				if (j + k >= REPLEN)
 					return (FALSE);
-				bcopy(&(clp->l_text[regex_match[num].rm_so]),
+				bcopy(&(clp->l_text[re_match[num].rm_so]),
 				    &repstr[j], k);
 				j += k;
 				if (*st == '\0')
@@ -356,15 +320,15 @@ re_forwsrch(void)
 	 * always makes the last line empty so this is good.
 	 */
 	while (clp != (curbp->b_headp)) {
-		regex_match[0].rm_so = tbo;
-		regex_match[0].rm_eo = llength(clp);
-		error = regexec_new(&re_buff, ltext(clp), RE_NMATCH, regex_match,
+		re_match[0].rm_so = tbo;
+		re_match[0].rm_eo = llength(clp);
+		error = regexec(&re_buff, ltext(clp), RE_NMATCH, re_match,
 		    REG_STARTEND);
 		if (error != 0) {
 			clp = lforw(clp);
 			tbo = 0;
 		} else {
-			curwp->w_doto = regex_match[0].rm_eo;
+			curwp->w_doto = re_match[0].rm_eo;
 			curwp->w_dotp = clp;
 			curwp->w_rflag |= WFMOVE;
 			return (TRUE);
@@ -382,11 +346,10 @@ re_forwsrch(void)
 static int
 re_backsrch(void)
 {
-	struct line     *clp;
+	struct line		*clp;
 	int		 tbo;
 	regmatch_t	 lastmatch;
 
-	lastmatch.rm_eo = 0;
 	clp = curwp->w_dotp;
 	tbo = curwp->w_doto;
 
@@ -403,27 +366,27 @@ re_backsrch(void)
 	 * always makes the last line empty so this is good.
 	 */
 	while (clp != (curbp->b_headp)) {
-		regex_match[0].rm_so = 0;
-		regex_match[0].rm_eo = llength(clp);
+		re_match[0].rm_so = 0;
+		re_match[0].rm_eo = llength(clp);
 		lastmatch.rm_so = -1;
 		/*
 		 * Keep searching until we don't match any longer.  Assumes a
-		 * non-match does not modify the regex_match array.  We have to
+		 * non-match does not modify the re_match array.  We have to
 		 * do this character-by-character after the first match since
 		 * POSIX regexps don't give you a way to do reverse matches.
 		 */
-		while (!regexec_new(&re_buff, ltext(clp), RE_NMATCH, regex_match,
-		    REG_STARTEND) && regex_match[0].rm_so < tbo) {
-			memcpy(&lastmatch, &regex_match[0], sizeof(regmatch_t));
-			regex_match[0].rm_so++;
-			regex_match[0].rm_eo = llength(clp);
+		while (!regexec(&re_buff, ltext(clp), RE_NMATCH, re_match,
+		    REG_STARTEND) && re_match[0].rm_so < tbo) {
+			memcpy(&lastmatch, &re_match[0], sizeof(regmatch_t));
+			re_match[0].rm_so++;
+			re_match[0].rm_eo = llength(clp);
 		}
 		if (lastmatch.rm_so == -1) {
 			clp = lback(clp);
 			tbo = llength(clp);
 		} else {
-			memcpy(&regex_match[0], &lastmatch, sizeof(regmatch_t));
-			curwp->w_doto = regex_match[0].rm_so;
+			memcpy(&re_match[0], &lastmatch, sizeof(regmatch_t));
+			curwp->w_doto = re_match[0].rm_so;
 			curwp->w_dotp = clp;
 			curwp->w_rflag |= WFMOVE;
 			return (TRUE);
@@ -556,9 +519,9 @@ killmatches(int cond)
 
 	while (clp != (curbp->b_headp)) {
 		/* see if line matches */
-		regex_match[0].rm_so = 0;
-		regex_match[0].rm_eo = llength(clp);
-		error = regexec_new(&re_buff, ltext(clp), RE_NMATCH, regex_match,
+		re_match[0].rm_so = 0;
+		re_match[0].rm_eo = llength(clp);
+		error = regexec(&re_buff, ltext(clp), RE_NMATCH, re_match,
 		    REG_STARTEND);
 
 		/* Delete line when appropriate */
@@ -631,9 +594,9 @@ countmatches(int cond)
 
 	while (clp != (curbp->b_headp)) {
 		/* see if line matches */
-		regex_match[0].rm_so = 0;
-		regex_match[0].rm_eo = llength(clp);
-		error = regexec_new(&re_buff, ltext(clp), RE_NMATCH, regex_match,
+		re_match[0].rm_so = 0;
+		re_match[0].rm_eo = llength(clp);
+		error = regexec(&re_buff, ltext(clp), RE_NMATCH, re_match,
 		    REG_STARTEND);
 
 		/* Count line when appropriate */
