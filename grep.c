@@ -8,9 +8,7 @@
 
 #include <sys/types.h>
 #include <ctype.h>
-
-#include "libgen.h"
-
+#include <libgen.h>
 #include <time.h>
 
 int	 globalwd = FALSE;

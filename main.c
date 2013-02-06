@@ -1,4 +1,4 @@
-/*	$OpenBSD: main.c,v 1.61 2009/06/04 02:23:37 kjell Exp $	*/
+/*	$OpenBSD: main.c,v 1.67 2012/05/29 06:08:48 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -9,10 +9,7 @@
 #include "def.h"
 #include "kbd.h"
 #include "funmap.h"
-
-#ifndef NO_MACRO
 #include "macro.h"
-#endif	/* NO_MACRO */
 
 #include <err.h>
 
@@ -30,12 +27,13 @@ struct mgwin	*curwp;				/* current window	*/
 struct mgwin	*wheadp;			/* MGWIN listhead	*/
 char		 pat[NPAT];			/* pattern		*/
 
-static void	 edinit(PF);
-static void usage(void);
+static void	 edinit(struct buffer *);
+static __dead void usage(void);
 
 extern char	*__progname;
+extern void     closetags(void);
 
-static void
+static __dead void
 usage()
 {
 	fprintf(stderr, "usage: %s [-n] [-f mode] [+number] [file ...]\n",
@@ -46,11 +44,11 @@ usage()
 int
 main(int argc, char **argv)
 {
-	char	*cp, *init_fcn_name = NULL;
-	PF	 init_fcn = NULL;
-	int	 o, i, nfiles;
-	int	 nobackups = 0;
-	struct buffer *bp;
+	char		*cp, *init_fcn_name = NULL;
+	PF		 init_fcn = NULL;
+	int	 	 o, i, nfiles;
+	int	  	 nobackups = 0;
+	struct buffer	*bp = NULL;
 
 #ifdef MRUBY
 //	mrb = mrb_open();
@@ -99,7 +97,7 @@ main(int argc, char **argv)
 
 	vtinit();		/* Virtual terminal.		*/
 	dirinit();		/* Get current directory.	*/
-	edinit(init_fcn);	/* Buffers, windows.		*/
+	edinit(bp);		/* Buffers, windows.		*/
 	ttykeymapinit();	/* Symbols, bindings.		*/
 
 	/*
@@ -109,7 +107,6 @@ main(int argc, char **argv)
 	 */
 	update();
 
-#ifndef NO_STARTUP
 	/* user startup file */
 #ifdef MRUBY
 	if ((cp = startupfile("mrb")) != NULL)
@@ -118,17 +115,18 @@ main(int argc, char **argv)
 	if ((cp = startupfile(NULL)) != NULL)
 		(void)load(cp);
 #endif /* MRUBY */
-#endif	/* !NO_STARTUP */
 
-	/*
-	 * Create scratch buffer now, killing old *init* buffer.
-	 * This causes *scratch* to be created and made curbp,
-	 * ensuring default modes are inherited from the startup
-	 * file correctly
+	/* 
+	 * Now ensure any default buffer modes from the startup file are
+	 * given to any files opened when parsing the startup file.
+	 * Note *scratch* will also be updated.
 	 */
-
-	if ((bp = bfind("*init*", FALSE)) != NULL)
-		killbuffer(bp);
+	for (bp = bheadp; bp != NULL; bp = bp->b_bufp) {
+		bp->b_flag = defb_flag;
+		for (i = 0; i <= defb_nmodes; i++) {
+                	bp->b_modes[i] = defb_modes[i];
+        	}
+	}
 
 	/* Force FFOTHARG=1 so that this mode is enabled, not simply toggled */
 	if (init_fcn)
@@ -197,32 +195,29 @@ notnum:
 		case FALSE:
 		default:
 			ttbeep();
-#ifndef NO_MACRO
 			macrodef = FALSE;
-#endif	/* !NO_MACRO */
 		}
 	}
 }
 
 /*
- * Initialize default buffer and window.
- * Initially, buffer is named *init*. This is changed later
- * to *scratch* after the startup files are read.
+ * Initialize default buffer and window. Default buffer is called *scratch*.
  */
 static void
-edinit(PF init_fcn)
+edinit(struct buffer *bp)
 {
-	struct buffer	*bp;
 	struct mgwin	*wp;
 
 	bheadp = NULL;
-	bp = bfind("*init*", TRUE);		/* Text buffer.		 */
+	bp = bfind("*scratch*", TRUE);		/* Text buffer.          */
+	if (bp == NULL)
+		panic("edinit");
+
 	wp = new_window(bp);
 	if (wp == NULL)
-		panic("Out of memory");
-	if (bp == NULL || wp == NULL)
-		panic("edinit");
-	curbp = bp;				/* Current ones.	 */
+		panic("edinit: Out of memory");
+
+	curbp = bp;				/* Current buffer.	 */
 	wheadp = wp;
 	curwp = wp;
 	wp->w_wndp = NULL;			/* Initialize window.	 */
@@ -246,9 +241,7 @@ quit(int f, int n)
 	if (s == FALSE
 	    || eyesno("Modified buffers exist; really exit") == TRUE) {
 		vttidy();
-#ifdef SYSCLEANUP
-		SYSCLEANUP;
-#endif	/* SYSCLEANUP */
+		closetags();
 		exit(GOOD);
 	}
 	return (TRUE);

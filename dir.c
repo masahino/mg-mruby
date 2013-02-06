@@ -22,9 +22,7 @@ dirinit(void)
 	mgcwd[0] = '\0';
 	if (getcwd(mgcwd, sizeof(mgcwd)) == NULL) {
 		ewprintf("Can't get current directory!");
-		/* gcc 4.3.2 insists on checking this. Not very likely I think. */
-		if (! chdir("/"))
-			ewprintf("I Can't even get / directory! o_O");
+		chdir("/");
 	}
 	if (!(mgcwd[0] == '/' && mgcwd [1] == '\0'))
 		(void)strlcat(mgcwd, "/", sizeof(mgcwd));

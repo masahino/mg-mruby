@@ -1,4 +1,4 @@
-/*	$OpenBSD: buffer.c,v 1.77 2011/01/23 00:45:03 kjell Exp $	*/
+/*	$OpenBSD: buffer.c,v 1.78 2012/03/14 13:56:35 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -6,13 +6,13 @@
  *		Buffer handling.
  */
 
-#include "libgen.h"
-#include <stdarg.h>
-
 #include "def.h"
 #include "kbd.h"		/* needed for modes */
 
-static struct buffer *makelist(void);
+#include <libgen.h>
+#include <stdarg.h>
+
+static struct buffer  *makelist(void);
 static struct buffer *bnew(const char *);
 
 static int usebufname(const char *);
@@ -31,7 +31,7 @@ togglereadonly(int f, int n)
 	if (!(curbp->b_flag & BFREADONLY))
 		curbp->b_flag |= BFREADONLY;
 	else {
-		curbp->b_flag &=~ BFREADONLY;
+		curbp->b_flag &= ~BFREADONLY;
 		if (curbp->b_flag & BFCHG)
 			ewprintf("Warning: Buffer was modified");
 	}
@@ -665,12 +665,8 @@ augbname(char *bn, const char *fn, size_t bs)
 {
 	int	 count;
 	size_t	 remain, len;
-	char    *fntmp;
 
-	fntmp = strdup(fn);
-	len = strlcpy(bn, basename(fntmp), bs);
-	free(fntmp);
-	if (len >= bs)
+	if ((len = xbasename(bn, fn, bs)) >= bs)
 		return (FALSE);
 
 	remain = bs - len;
@@ -796,10 +792,8 @@ notmodified(int f, int n)
 	return (TRUE);
 }
 
-#ifndef NO_HELP
 /*
- * Popbuf and set all windows to top of buffer.	 Currently only used by
- * help functions.
+ * Popbuf and set all windows to top of buffer.
  */
 int
 popbuftop(struct buffer *bp, int flags)
@@ -818,7 +812,6 @@ popbuftop(struct buffer *bp, int flags)
 	}
 	return (popbuf(bp, flags) != NULL);
 }
-#endif
 
 /*
  * Return the working directory for the current buffer, terminated
@@ -856,7 +849,7 @@ int
 checkdirty(struct buffer *bp)
 {
 	int s;
-
+	
 	if ((bp->b_flag & (BFDIRTY | BFIGNDIRTY)) == BFDIRTY) {
 		if ((s = eyorn("File changed on disk; really edit the buffer"))
 		    != TRUE)
@@ -867,3 +860,4 @@ checkdirty(struct buffer *bp)
 
 	return (TRUE);
 }
+	
