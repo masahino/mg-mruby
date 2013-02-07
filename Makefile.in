@@ -70,7 +70,7 @@ EXE_EXT=	@exe_ext@
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-all: $(name)
+all: $(name) 
 
 
 $(name): $(OBJS)

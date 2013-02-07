@@ -525,9 +525,9 @@ ldelete(RSIZE n, int kflag)
 		     for (i = 0; i < doto; i++) {
 			  start_byte += utf8_bytes(ltext(dotp), start_byte, 1);
 		     }
-		     del_bytes = utf8_bytes(ltext(dotp), start_byte, n);
 		}
 		chunk = utf8_nlength(ltext(dotp), llength(dotp)) - doto;
+		del_bytes = utf8_bytes(ltext(dotp), start_byte, chunk);
 #else
 		chunk = dotp->l_used - doto;
 #endif /* UTF8 */

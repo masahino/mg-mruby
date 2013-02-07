@@ -668,6 +668,11 @@ int		 next_error(int, int);
 int		 globalwdtoggle(int, int);
 int		 compile(int, int);
 
+/* strtonum.c X */
+#ifdef HAVE_NOSTRTONUM
+long long strtonum(const char *numstr, long long minval, long long maxval, const char **errstrp);
+#endif /* HAVE_NOSTRTONUM */
+
 /*
  * Externals.
  */

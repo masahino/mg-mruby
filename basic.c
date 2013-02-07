@@ -68,7 +68,7 @@ int
 gotoeol(int f, int n)
 {
 #ifdef UTF8
-     curwp->w_doto = utf8_length(ltext(curwp->w_dotp));
+	curwp->w_doto = utf8_nlength(ltext(curwp->w_dotp), llength(curwp->w_dotp));
 #else
 	curwp->w_doto = llength(curwp->w_dotp);
 #endif /* UTF8 */

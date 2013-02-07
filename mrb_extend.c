@@ -20,6 +20,24 @@ extern int makebkfile(int, int);
 extern int setfillcol(int, int);
 
 /*
+     auto‐execute
+            Register an auto‐execute hook; that is, specify a filename pattern
+            (conforming to the shell’s filename globbing rules) and an associ‐
+            ated function to execute when a file matching the specified pat‐
+            tern is read into a buffer.
+*/
+mrb_value
+mrb_s_auto_execute(mrb_state *mrb, mrb_value self)
+{
+     mrb_value pat, func;
+     int s;
+     mrb_get_args(mrb, "SS", &pat, &func);
+     if ((s = add_autoexec(RSTRING_PTR(pat), RSTRING_PTR(func))) != TRUE)
+	  return mrb_fixnum_value(s);
+     return mrb_true_value();
+}
+
+/*
      auto‐indent‐mode
             Toggle indent mode, where indentation is preserved after a new‐
             line.
@@ -34,8 +52,21 @@ mrb_s_auto_indent_mode(mrb_state *mrb, mrb_value self)
 }
 
 /*
+     backward‐char
+            Move cursor backwards one character.
+*/
+mrb_value
+mrb_s_backward_char(mrb_state *mrb, mrb_value self)
+{
+     mrb_int n_value = 1;
+     mrb_get_args(mrb, "|i", &n_value);
+     return mrb_fixnum_value(backchar(FFRAND, n_value));
+}
+
+
+/*
      delete‐backward‐char
-            Delete backwards _n characters.  Like delete‐char, this actually
+            Delete backwards n characters.  Like delete‐char, this actually
             does a kill if presented with an argument.
 */
 mrb_value
@@ -44,6 +75,19 @@ mrb_s_delete_backward_char(mrb_state *mrb, mrb_value self)
      mrb_int n_value = 1;
      mrb_get_args(mrb, "|i", &n_value);
      return mrb_fixnum_value(backdel(FFRAND, n_value));
+}
+
+/*
+     forward‐char
+            Move cursor forwards (or backwards, if n is negative) n charac‐
+            ters.  Returns an error if the end of buffer is reached.
+*/
+mrb_value
+mrb_s_forward_char(mrb_state *mrb, mrb_value self)
+{
+     mrb_int n_value = 1;
+     mrb_get_args(mrb, "|i", &n_value);
+     return mrb_fixnum_value(forwchar(FFRAND, n_value));
 }
 
 
@@ -73,7 +117,9 @@ mrb_value mrb_s_insert(mrb_state *mrb, mrb_value self)
      int len, ret;
      mrb_get_args(mrb, "S", &str);
      len = RSTRING_LEN(str);
+	fprintf(stderr, "len = %d\n", len);
      cstr = strndup(RSTRING_PTR(str), len);
+	fprintf(stderr, "cstr = %s\n", cstr);
      ret = linsert_str(cstr, len);
      return mrb_fixnum_value(ret);
 }
@@ -126,10 +172,16 @@ mrb_extend_init(mrb_state *mrb)
 
     kernel = mrb_class_get(mrb, "Kernel");
 
+    mrb_define_module_function(mrb, kernel, "auto_execute",
+			       mrb_s_auto_execute, ARGS_REQ(2));
     mrb_define_module_function(mrb, kernel, "auto_indent_mode=", 
 			       mrb_s_auto_indent_mode, ARGS_REQ(1));
+    mrb_define_module_function(mrb, kernel, "backward_char",
+			       mrb_s_backward_char, ARGS_OPT(1));
     mrb_define_module_function(mrb, kernel, "delete_backward_char",
 			       mrb_s_delete_backward_char, ARGS_OPT(1));
+    mrb_define_module_function(mrb, kernel, "forward_char",
+			       mrb_s_forward_char, ARGS_OPT(1));
     mrb_define_module_function(mrb, kernel, "global_set_key",
 			       mrb_s_global_set_key, ARGS_REQ(2));
     mrb_define_module_function(mrb, kernel, "insert",
@@ -149,12 +201,6 @@ mrb_extend_init(mrb_state *mrb)
             Help Apropos.  Prompt the user for a string, open the *help*
             buffer, and list all mmgg commands that contain that string.
 
-     auto‐execute
-            Register an auto‐execute hook; that is, specify a filename pattern
-            (conforming to the shell’s filename globbing rules) and an associ‐
-            ated function to execute when a file matching the specified pat‐
-            tern is read into a buffer.
-
      auto‐fill‐mode
             Toggle auto‐fill mode (sometimes called mail‐mode), where text
             inserted past the fill column is automatically wrapped to a new
@@ -164,14 +210,11 @@ mrb_extend_init(mrb_state *mrb)
             Move the dot to the first non‐whitespace character on the current
             line.
 
-     backward‐char
-            Move cursor backwards one character.
-
      backward‐kill‐word
-            Kill text backwards by _n words.
+            Kill text backwards by n words.
 
      backward‐paragraph
-            Move cursor backwards _n paragraphs.  Paragraphs are delimited by
+            Move cursor backwards n paragraphs.  Paragraphs are delimited by
             <NL><NL> or <NL><TAB> or <NL><SPACE>.
 
      backward‐word
@@ -227,7 +270,7 @@ mrb_extend_init(mrb_state *mrb)
             current line.
 
      delete‐char
-            Delete _n characters forward.  If any argument is present, it kills
+            Delete _n characters forward.  If any argument is present, it kills
             rather than deletes, saving the result in the kill buffer.
 
      delete‐horizontal‐space
@@ -268,7 +311,7 @@ mrb_extend_init(mrb_state *mrb)
             Set all characters in the region to lower case.
 
      downcase‐word
-            Set characters to lower case, starting at the dot, and ending _n
+            Set characters to lower case, starting at the dot, and ending _n
             words away.
 
      emacs‐version
@@ -327,10 +370,6 @@ mrb_extend_init(mrb_state *mrb)
      find‐file‐other‐window
             Opens the specified file in a second buffer.  Splits the current
             window if necessary.
-
-     forward‐char
-            Move cursor forwards (or backwards, if _n is negative) _n charac‐
-            ters.  Returns an error if the end of buffer is reached.
 
      forward‐paragraph
             Move forward _n paragraphs.  Paragraphs are delimited by <NL><NL>
@@ -440,7 +479,7 @@ mrb_extend_init(mrb_state *mrb)
             characters.
 
      next‐line
-            Move forward _n lines.
+            Move forward n lines.
 
      no‐tab‐mode
             Toggle notab mode.  In this mode, spaces are inserted rather than
@@ -467,7 +506,7 @@ mrb_extend_init(mrb_state *mrb)
             string is settable by using ’set‐prefix‐string’.
 
      previous‐line
-            Move backwards _n lines.
+            Move backwards n lines.
 
      previous‐window
             This command makes the previous (up the screen) window the current
