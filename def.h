@@ -14,6 +14,10 @@
 #include	"ttydef.h"
 #include	"chrdef.h"
 
+#ifndef __dead
+#define __dead
+#endif 
+
 typedef int	(*PF)(int, int);	/* generally useful type */
 
 /*
