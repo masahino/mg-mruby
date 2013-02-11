@@ -714,3 +714,15 @@ int		 tceeol;
 int		 tcinsl;
 int		 tcdell;
 int		 rptcount;	/* successive invocation count */
+
+#ifdef HAVE_NOFPARSELN
+char *fparseln(FILE *stream, size_t *len, size_t *lineno, const char delim[3], int flags);
+/*
+ * fparseln() specific operation flags.
+ */
+#define FPARSELN_UNESCESC       0x01
+#define FPARSELN_UNESCCONT      0x02
+#define FPARSELN_UNESCCOMM      0x04
+#define FPARSELN_UNESCREST      0x08
+#define FPARSELN_UNESCALL       0x0f
+#endif /* HAVE_NOFPARSELN */

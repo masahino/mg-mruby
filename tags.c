@@ -15,9 +15,13 @@
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
-#include <util.h>
 
 #include "def.h"
+
+#ifndef HAVE_NOFPARSELN
+#include <util.h>
+#endif /* HAVE_NOFPARSELN */
+
 
 struct ctag;
 

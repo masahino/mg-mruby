@@ -155,13 +155,28 @@ cat << EOF > testfile.c
 #include <stdio.h>
 #include <sys/stat.h>
 int main(void)
-{struct stat sb; sb.st_mtimespec.tv_sec = 0; return 0;}
+{fparseln(NULL, NULL, NULL, NULL); return 0;}
 EOF
 if ${CC:-gcc} -Wall testfile.c -o testfile 2>&3; then
     echo 'Found.'
     add_inc HAVE_ST_MTIMESPEC
 else
     echo 'Not Found, using st_mtime.'
+fi
+
+note 'fparseln'
+cat << EOF > testfile.c
+#include <stdio.h>
+#include <util.h>
+int main(void)
+{fparseln(NULL, NULL, NULL, NULL, NULL);return 0;}
+EOF
+if ${CC:-gcc} -Wall testfile.c -o testfile 2>&3; then
+    echo 'Found.'
+else
+    echo 'Not Found, adding.'
+    add_inc HAVE_NOFPARSELN
+    extraobjs="$extraobjs fparseln.o"
 fi
 
 # With -O2 or higher you get a warning for strict-aliasing on
