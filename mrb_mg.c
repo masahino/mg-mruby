@@ -77,6 +77,18 @@ mrb_s_showmatch(mrb_state *mrb, mrb_value self)
      return mrb_fixnum_value(ret);
 }
 
+/* random.c */
+mrb_value
+mrb_s_indent(mrb_state *mrb, mrb_value self)
+{
+     mrb_value n;
+     int ret;
+
+     mrb_get_args(mrb, "o", &n);
+     ret = indent(FFOTHARG, mrb_fixnum(n));
+     return mrb_fixnum_value(ret);
+}
+
 void
 mrb_mg_init()
 {
@@ -95,7 +107,11 @@ mrb_mg_init()
     /* match.c */
     mrb_define_module_function(mrb, kernel, "showmatch",
 			       mrb_s_showmatch, ARGS_REQ(2));
-    
+
+    /* random.c */
+    mrb_define_module_function(mrb, kernel, "indent",
+			       mrb_s_indent, ARGS_REQ(1));
+
     /* const */
     mrb_define_const(mrb, kernel, "FFRAND", mrb_fixnum_value(FFRAND));
 

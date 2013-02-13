@@ -65,12 +65,26 @@ static PF mrb_charmap[] = {
      mrb_mode_callback, mrb_mode_callback
 };
 
-static struct KEYMAPE (1) mrb_map = {
-     1,
-     1,
+static PF mrb_charmap_cc[] = {
+        mrb_mode_callback,           /* ^C */
+        mrb_mode_callback,           /* ^D */
+        mrb_mode_callback,           /* ^E */
+        mrb_mode_callback,           /* ^F */
+        mrb_mode_callback,           /* ^G */
+        mrb_mode_callback,           /* ^H */
+        mrb_mode_callback,           /* ^I */
+        mrb_mode_callback,           /* ^J */
+        mrb_mode_callback,           /* ^K */
+        mrb_mode_callback,           /* ^L */
+        mrb_mode_callback,           /* ^M */
+};
+static struct KEYMAPE (2) mrb_map = {
+     2,
+     2,
      rescan,
      {
-	  {' ', '~', mrb_charmap, NULL}
+	  {CCHR('C'), CCHR('M'), mrb_charmap_cc, NULL},
+	  {' ', '~', mrb_charmap, NULL},
      }
 };
 
@@ -195,7 +209,6 @@ static int mrb_mode_callback(int f, int n)
      if (cur_mode == NULL) {
 	  return rescan(f, n);
      }
-
      key_hash = cur_mode->callback_h;
      keys = mrb_hash_keys(cur_mode->mrb, key_hash);
      for (i = 0; i < RARRAY_LEN(keys); i++) {
