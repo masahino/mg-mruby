@@ -151,6 +151,18 @@ mrb_s_make_backup_files(mrb_state *mrb, mrb_value self)
 }
 
 /*
+     newline
+            Insert a newline into the current buffer.
+*/
+mrb_value
+mrb_s_newline(mrb_state *mrb, mrb_value self)
+{
+     mrb_int n_value = 1;
+     mrb_get_args(mrb, "|i", &n_value);
+     return mrb_fixnum_value(newline(FFRAND, n_value));
+}
+
+/*
      set‐fill‐column
             Prompt the user for a fill column.  Used by auto‐fill‐mode.
 */
@@ -190,6 +202,8 @@ mrb_extend_init(mrb_state *mrb)
 //			       mrb_s_load, ARGS_REQ(1));
     mrb_define_module_function(mrb, kernel, "make_backup_files=", 
 			       mrb_s_make_backup_files, ARGS_REQ(1));
+    mrb_define_module_function(mrb, kernel, "newline",
+			       mrb_s_newline, ARGS_OPT(1));
     mrb_define_module_function(mrb, kernel, "set_fill_column", 
 			       mrb_s_set_fill_column, ARGS_REQ(1));
 
@@ -469,9 +483,6 @@ mrb_extend_init(mrb_state *mrb)
 
      negative‐argument
             Process a negative argument for keyboard‐invoked functions.
-
-     newline
-            Insert a newline into the current buffer.
 
      newline‐and‐indent
             Insert a newline, then enough tabs and spaces to duplicate the
