@@ -611,6 +611,9 @@ evalexpr(int f, int n)
 int
 evalbuffer(int f, int n)
 {
+#ifdef MRUBY
+        return mrb_evalbuffer(f, n);
+#else
 	struct line		*lp;
 	struct buffer		*bp = curbp;
 	int		 s;
@@ -627,6 +630,7 @@ evalbuffer(int f, int n)
 			return (s);
 	}
 	return (TRUE);
+#endif /* MRUBY */
 }
 
 /*

@@ -345,8 +345,8 @@ mrb_extend_init(mrb_state *mrb)
             below it.
 
      eval‐current‐buffer
-            Evaluate the current buffer as a series of mmgg commands.  Useful
-            for testing mmgg startup files.
+            Evaluate the current buffer as a series of mg commands.  Useful
+            for testing mg startup files.
 
      eval‐expression
             Get one line from the user, and run it.  Useful for testing

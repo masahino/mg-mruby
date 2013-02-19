@@ -294,10 +294,11 @@ mrb_s_add_mode(mrb_state *mrb, mrb_value self)
 
 void mrb_mode_init(mrb_state *mrb)
 {
-     struct RClass *mode, *kernel;
+     struct RClass *mode, *kernel, *mg;
 
      maps = NULL;
-     kernel = mrb_class_get(mrb, "Kernel");
+//     kernel = mrb_class_get(mrb, "Kernel");
+     mg = mrb_class_get(mrb, "MG");
 
      
      mode = mrb_define_class(mrb, "Mode", mrb->object_class);
@@ -306,7 +307,7 @@ void mrb_mode_init(mrb_state *mrb)
      mrb_define_method(mrb, mode, "define_key", mrb_mode_define_key, 
 		       ARGS_ANY());
 
-     mrb_define_module_function(mrb, kernel, "add_mode",
+     mrb_define_module_function(mrb, mg, "add_mode",
 				mrb_s_add_mode, ARGS_REQ(1));
 
 }

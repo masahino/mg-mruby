@@ -66,6 +66,25 @@ mrb_load(char *fname)
      return FALSE;
 }
 
+int
+mrb_evalbuffer(int f, int n)
+{
+     struct line *lp;
+     struct buffer *bp = curbp;
+     mrb_value buf_str, ret;
+
+     buf_str = mrb_str_new_cstr(mrb, "");
+
+     for (lp = bfirstlp(bp); lp != bp->b_headp; lp = lforw(lp)) {
+	  buf_str = mrb_str_cat(mrb, buf_str, ltext(lp), llength(lp));
+	  buf_str = mrb_str_cat2(mrb, buf_str, "\n");
+	  fprintf(stderr, "%s\n", RSTRING_PTR(buf_str));
+     }
+     ret = mrb_load_string(mrb, RSTRING_PTR(buf_str));
+     return TRUE;
+}
+
+
 /* match.c */
 mrb_value
 mrb_s_showmatch(mrb_state *mrb, mrb_value self)
@@ -92,31 +111,33 @@ mrb_s_indent(mrb_state *mrb, mrb_value self)
 void
 mrb_mg_init()
 {
-    struct RClass *kernel;
+     struct RClass *kernel, *mg, *object;
 
-    mrb = mrb_open();
+     mrb = mrb_open();
 
-    kernel = mrb_class_get(mrb, "Kernel");
+//    kernel = mrb_class_get(mrb, "Kernel");
+    mg = mrb_define_module(mrb, "MG");
 
-    mrb_define_module_function(mrb, kernel, "dired_backup_unflag=", 
+    mrb_define_module_function(mrb, mg, "dired_backup_unflag=", 
 			       mrb_s_dired_backup_unflag, ARGS_REQ(1));
 
-    mrb_define_module_function(mrb, kernel, "debug_log", 
+    mrb_define_module_function(mrb, mg, "debug_log", 
 			       mrb_s_debug_log, ARGS_REQ(1));
 
     /* match.c */
-    mrb_define_module_function(mrb, kernel, "showmatch",
+    mrb_define_module_function(mrb, mg, "showmatch",
 			       mrb_s_showmatch, ARGS_REQ(2));
 
     /* random.c */
-    mrb_define_module_function(mrb, kernel, "indent",
+    mrb_define_module_function(mrb, mg, "indent",
 			       mrb_s_indent, ARGS_REQ(1));
 
     /* const */
-    mrb_define_const(mrb, kernel, "FFRAND", mrb_fixnum_value(FFRAND));
+    mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
 
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
+
 }
 
 //#endif
