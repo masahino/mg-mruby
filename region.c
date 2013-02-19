@@ -399,14 +399,27 @@ void
 region_put_data(const char *buf, int len)
 {
 	int i;
+#ifdef UTF8
+	int size;
+	char tmp_s[4];
+#endif /* UTF8 */
 
+#ifdef UTF8
+	i = 0;
+	while (buf[i] != '\0' && i < len) {
+	     if (buf[i] == '\n') {
+		  lnewline();
+		  i++;
+	     } else {
+		  size = utf8_bytes(buf, i, 1);
+		  linsert_str(&buf[i], size);
+		  i += size;
+	     }
+#else
 	for (i = 0; buf[i] != '\0' && i < len; i++) {
 		if (buf[i] == '\n')
 			lnewline();
 		else
-#ifdef UTF8
-		     linsert_str(buf, strlen(buf));
-#else
 			linsert(1, buf[i]);
 #endif /* UTF8 */
 	}

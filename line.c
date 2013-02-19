@@ -162,7 +162,7 @@ linsert_str(const char *s, int n)
 		return (TRUE);
 
 #ifdef UTF8
-	chars = utf8_length((char *)s);
+	chars = utf8_nlength((char *)s, n);
 #endif /* UTF8 */
 	lchange(WFFULL);
 
