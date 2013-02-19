@@ -301,7 +301,7 @@ void mrb_mode_init(mrb_state *mrb)
      mg = mrb_class_get(mrb, "MG");
 
      
-     mode = mrb_define_class(mrb, "Mode", mrb->object_class);
+     mode = mrb_define_class_under(mrb, mg, "Mode", mrb->object_class);
      mrb_define_method(mrb, mode, "initialize", mrb_mode_initialize, 
 		       ARGS_REQ(1));
      mrb_define_method(mrb, mode, "define_key", mrb_mode_define_key, 
