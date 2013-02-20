@@ -532,8 +532,15 @@ ldelete(RSIZE n, int kflag)
 		chunk = dotp->l_used - doto;
 #endif /* UTF8 */
 
+#ifdef UTF8
+		if (chunk > n) {
+		        del_bytes = n;
+		        chunk = n;
+		}
+#else
 		if (chunk > n)
 			chunk = n;
+#endif /* UTF8 */
 		/* End of line, merge */
 		if (chunk == 0) {
 			if (dotp == blastlp(curbp))

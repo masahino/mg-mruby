@@ -117,9 +117,7 @@ mrb_value mrb_s_insert(mrb_state *mrb, mrb_value self)
      int len, ret;
      mrb_get_args(mrb, "S", &str);
      len = RSTRING_LEN(str);
-	fprintf(stderr, "len = %d\n", len);
      cstr = strndup(RSTRING_PTR(str), len);
-	fprintf(stderr, "cstr = %s\n", cstr);
      ret = linsert_str(cstr, len);
      return mrb_fixnum_value(ret);
 }
@@ -255,7 +253,7 @@ mrb_extend_init(mrb_state *mrb)
             Invoke the keyboard macro.
 
      capitalize‐word
-            Capitalize _n words; i.e. convert the first character of the word
+            Capitalize n words; i.e. convert the first character of the word
             to upper case, and subsequent letters to lower case.
 
      cd     Change the global working directory.  See also global‐wd‐mode.
@@ -274,7 +272,7 @@ mrb_extend_init(mrb_state *mrb)
             expression.
 
      define‐key
-            Prompts the user for a named keymap (mode), a key, and an mmgg com‐
+            Prompts the user for a named keymap (mode), a key, and an mg com‐
             mand, then creates a keybinding in the appropriate map.
 
      delete‐blank‐lines
@@ -329,7 +327,7 @@ mrb_extend_init(mrb_state *mrb)
             words away.
 
      emacs‐version
-            Return an mmgg version string.
+            Return an mg version string.
 
      end‐kbd‐macro
             Stop defining a keyboard macro.
@@ -350,7 +348,7 @@ mrb_extend_init(mrb_state *mrb)
 
      eval‐expression
             Get one line from the user, and run it.  Useful for testing
-            expressions in mmgg startup files.
+            expressions in mg startup files.
 
      exchange‐point‐and‐mark
             Swap the values of "dot" and "mark" in the current window.  Return
@@ -386,7 +384,7 @@ mrb_extend_init(mrb_state *mrb)
             window if necessary.
 
      forward‐paragraph
-            Move forward _n paragraphs.  Paragraphs are delimited by <NL><NL>
+            Move forward n paragraphs.  Paragraphs are delimited by <NL><NL>
             or <NL><TAB> or <NL><SPACE>.
 
      forward‐word
@@ -397,7 +395,7 @@ mrb_extend_init(mrb_state *mrb)
             ’rescan’.
 
      global‐wd‐mode
-            Toggle global working‐directory mode.  When enabled, mmgg defaults
+            Toggle global working‐directory mode.  When enabled, mg defaults
             to opening files (and executing commands like compile and grep)
             relative to the global working directory.  When disabled, a work‐
             ing directory is set for each buffer.
@@ -456,13 +454,13 @@ mrb_extend_init(mrb_state *mrb)
             rent line, then it kills back abs(n) lines.
 
      kill‐paragraph
-            Delete _n paragraphs starting with the current one.
+            Delete n paragraphs starting with the current one.
 
      kill‐region
             Kill the currently defined region.
 
      kill‐word
-            Delete forward _n words.
+            Delete forward n words.
 
      line‐number‐mode
             Toggle whether line and column numbers are displayed in the mode‐
@@ -500,7 +498,7 @@ mrb_extend_init(mrb_state *mrb)
             Turn off the modified flag in the current buffer.
 
      open‐line
-            Open up some blank space.  Essentially, insert _n newlines, then
+            Open up some blank space.  Essentially, insert n newlines, then
             back up over them.
 
      other‐window
@@ -525,7 +523,7 @@ mrb_extend_init(mrb_state *mrb)
             lot if there is only 1 window.
 
      push‐shell
-            Suspend mmgg and switch to alternate screen, if available.
+            Suspend mg and switch to alternate screen, if available.
 
      pwd    Display current (global) working directory in the status area.
 
@@ -564,7 +562,7 @@ mrb_extend_init(mrb_state *mrb)
      recenter
             Reposition dot in the current window.  By default, the dot is cen‐
             tered.  If given a positive argument (n), the display is reposi‐
-            tioned to line n.  If _n is negative, it is that line from the bot‐
+            tioned to line n.  If n is negative, it is that line from the bot‐
             tom.
 
      redraw‐display
@@ -576,7 +574,7 @@ mrb_extend_init(mrb_state *mrb)
             optionally creating a backup copy.
 
      save‐buffers‐kill‐emacs
-            Offer to save modified buffers and quit mmgg.
+            Offer to save modified buffers and quit mg.
 
      save‐some‐buffers
             Look through the list of buffers, offering to save any buffer that
@@ -584,19 +582,19 @@ mrb_extend_init(mrb_state *mrb)
             (such as *scratch*, *grep*, *compile*) are ignored.
 
      scroll‐down
-            Scroll backwards _n pages.  A two‐line overlap between pages is
+            Scroll backwards n pages.  A two‐line overlap between pages is
             assumed.  If given a repeat argument, scrolls back lines, not
             pages.
 
      scroll‐one‐line‐down
-            Scroll the display down _n lines without changing the cursor posi‐
+            Scroll the display down n lines without changing the cursor posi‐
             tion.
 
      scroll‐one‐line‐up
-            Scroll the display _n lines up without moving the cursor position.
+            Scroll the display n lines up without moving the cursor position.
 
      scroll‐other‐window
-            Scroll the next window in the window list window forward _n pages.
+            Scroll the next window in the window list window forward n pages.
 
      scroll‐up
             Scroll forward one page.  A two‐line overlap between pages is
@@ -715,6 +713,6 @@ mrb_extend_init(mrb_state *mrb)
             to that file.  Update the remembered file name and clear the
             buffer changed flag.
 
-     yank   Yank text from kill‐buffer.  Unlike emacs, the mmgg kill buffer con‐
+     yank   Yank text from kill‐buffer.  Unlike emacs, the mg kill buffer con‐
             sists only of the most recent kill.  It is not a ring.
 */

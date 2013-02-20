@@ -53,13 +53,19 @@ int
 mrb_load(char *fname)
 {
      FILE *f;
+     
      if ((fname = adjustname(fname, TRUE)) == NULL) {
 	  /* just to be careful */
 	  return (FALSE);
      }
      f = fopen(fname, "r");
      if (f != NULL) {
-	  mrb_load_file(mrb, f);
+	  if (strlen(fname) > 4 &&
+	      strcmp(&fname[strlen(fname)-4], ".mrb") == 0) {
+	       mrb_load_irep_file(mrb, f);
+	  } else {
+	       mrb_load_file(mrb, f);
+	  }
 	  fclose(f);
 	  return TRUE;
      }
@@ -78,7 +84,6 @@ mrb_evalbuffer(int f, int n)
      for (lp = bfirstlp(bp); lp != bp->b_headp; lp = lforw(lp)) {
 	  buf_str = mrb_str_cat(mrb, buf_str, ltext(lp), llength(lp));
 	  buf_str = mrb_str_cat2(mrb, buf_str, "\n");
-	  fprintf(stderr, "%s\n", RSTRING_PTR(buf_str));
      }
      ret = mrb_load_string(mrb, RSTRING_PTR(buf_str));
      return TRUE;
