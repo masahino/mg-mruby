@@ -106,8 +106,8 @@ mrb_s_global_set_key(mrb_state *mrb, mrb_value self)
      return mrb_fixnum_value(ret);
 }
 
-/*
-     insert
+/* 
+    insert
             Insert a string, mainly for use from macros.
 */
 mrb_value mrb_s_insert(mrb_state *mrb, mrb_value self)
@@ -161,50 +161,76 @@ mrb_s_newline(mrb_state *mrb, mrb_value self)
 }
 
 /*
-     set‐fill‐column
+     recenter
+            Reposition dot in the current window.  By default, the dot is cen‐
+            tered.  If given a positive argument (n), the display is reposi‐
+            tioned to line n.  If n is negative, it is that line from the bot‐
+            tom.
+*/
+mrb_value
+mrb_s_recenter(mrb_state *mrb, mrb_value self)
+{
+     int ret;
+     ret = reposition(FFRAND, 0);
+     return mrb_true_value();
+}
+/*
+     redraw‐display
+            Refresh the display.  Recomputes all window sizes in case some‐
+            thing has changed.
+*/
+mrb_value
+mrb_s_redraw_display(mrb_state *mrb, mrb_value self)
+{
+     return mrb_fixnum_value(redraw(FFRAND, 0));
+}
+
+/*
+     set-fill-column
             Prompt the user for a fill column.  Used by auto‐fill‐mode.
 */
 mrb_value
 mrb_s_set_fill_column(mrb_state *mrb, mrb_value self)
 {
-//     mrb_value value;
-//     mrb_get_args(mrb, "i", &value);
-//     setfillcol(0, mrb_fixnum(value));
+     mrb_value value;
+     mrb_get_args(mrb, "i", &value);
+     setfillcol(0, mrb_fixnum(value));
      return mrb_nil_value();
 }
-
-
 
 void
 mrb_extend_init(mrb_state *mrb)
 {
-    struct RClass *kernel;
+    struct RClass *mg;
 
-    kernel = mrb_class_get(mrb, "Kernel");
+    mg = mrb_class_get(mrb, "MG");
 
-    mrb_define_module_function(mrb, kernel, "auto_execute",
+    mrb_define_module_function(mrb, mg, "auto_execute",
 			       mrb_s_auto_execute, ARGS_REQ(2));
-    mrb_define_module_function(mrb, kernel, "auto_indent_mode=", 
+    mrb_define_module_function(mrb, mg, "auto_indent_mode=", 
 			       mrb_s_auto_indent_mode, ARGS_REQ(1));
-    mrb_define_module_function(mrb, kernel, "backward_char",
+    mrb_define_module_function(mrb, mg, "backward_char",
 			       mrb_s_backward_char, ARGS_OPT(1));
-    mrb_define_module_function(mrb, kernel, "delete_backward_char",
+    mrb_define_module_function(mrb, mg, "delete_backward_char",
 			       mrb_s_delete_backward_char, ARGS_OPT(1));
-    mrb_define_module_function(mrb, kernel, "forward_char",
+    mrb_define_module_function(mrb, mg, "forward_char",
 			       mrb_s_forward_char, ARGS_OPT(1));
-    mrb_define_module_function(mrb, kernel, "global_set_key",
+    mrb_define_module_function(mrb, mg, "global_set_key",
 			       mrb_s_global_set_key, ARGS_REQ(2));
-    mrb_define_module_function(mrb, kernel, "insert",
+    mrb_define_module_function(mrb, mg, "insert",
 			       mrb_s_insert, ARGS_REQ(1));
 //    mrb_define_module_function(mrb, kernel, "load",
 //			       mrb_s_load, ARGS_REQ(1));
-    mrb_define_module_function(mrb, kernel, "make_backup_files=", 
+    mrb_define_module_function(mrb, mg, "make_backup_files=", 
 			       mrb_s_make_backup_files, ARGS_REQ(1));
-    mrb_define_module_function(mrb, kernel, "newline",
+    mrb_define_module_function(mrb, mg, "newline",
 			       mrb_s_newline, ARGS_OPT(1));
-    mrb_define_module_function(mrb, kernel, "set_fill_column", 
+    mrb_define_module_function(mrb, mg, "recenter",
+			       mrb_s_recenter, ARGS_NONE());
+    mrb_define_module_function(mrb, mg, "redraw_display",
+			       mrb_s_redraw_display, ARGS_NONE());
+    mrb_define_module_function(mrb, mg, "set_fill_column", 
 			       mrb_s_set_fill_column, ARGS_REQ(1));
-
 }
 
 /*
@@ -558,16 +584,6 @@ mrb_extend_init(mrb_state *mrb)
             from the user and search for it starting at dot.  If found, move
             dot to just after the matched characters.  display does all the
             hard stuff.  If not found, it just prints a message.
-
-     recenter
-            Reposition dot in the current window.  By default, the dot is cen‐
-            tered.  If given a positive argument (n), the display is reposi‐
-            tioned to line n.  If n is negative, it is that line from the bot‐
-            tom.
-
-     redraw‐display
-            Refresh the display.  Recomputes all window sizes in case some‐
-            thing has changed.
 
      save‐buffer
             Save the contents of the current buffer if it has been changed,

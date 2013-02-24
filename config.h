@@ -12,4 +12,5 @@
 #define HAVE_ARC4RANDOM
 #define HAVE_NOSTRTONUM
 #define HAVE_ST_MTIMESPEC
+#define UTF8
 #define MRUBY
