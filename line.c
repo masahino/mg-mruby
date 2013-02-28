@@ -534,8 +534,8 @@ ldelete(RSIZE n, int kflag)
 
 #ifdef UTF8
 		if (chunk > n) {
-		        del_bytes = n;
-		        chunk = n;
+		     del_bytes = utf8_bytes(ltext(dotp), start_byte, 1);
+		     chunk = n;
 		}
 #else
 		if (chunk > n)

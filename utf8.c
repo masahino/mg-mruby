@@ -24,6 +24,9 @@ int utf8_bytes(char *line, int index, int counts)
 	  } else if (0xE0 <= c && c <= 0xEF) {
 	       bytes += 3;
 	       c = line[index+bytes];
+//	  } else if (0x80 <= c && c <= 0x8F && index > 0) {
+//	       bytes += utf8_bytes(line, index - 1, 1);
+//	       c = line[index + bytes];
 	  } else {
 	       bytes += 1;
 	       c = line[index+bytes];

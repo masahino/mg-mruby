@@ -51,7 +51,11 @@ backchar(int f, int n)
 				return (FALSE);
 			}
 			curwp->w_dotp = lp;
+#ifdef UTF8
+			curwp->w_doto = llength_utf8(lp);
+#else
 			curwp->w_doto = llength(lp);
+#endif /* UTF8 */
 			curwp->w_rflag |= WFMOVE;
 			curwp->w_dotline--;
 		} else
@@ -138,7 +142,11 @@ gotoeob(int f, int n)
 	
 	(void) setmark(f, n);
 	curwp->w_dotp = blastlp(curbp);
+#ifdef UTF8
+	curwp->w_doto = llength_utf8(curwp->w_dotp);
+#else
 	curwp->w_doto = llength(curwp->w_dotp);
+#endif /* UTF8 */
 	curwp->w_dotline = curwp->w_bufp->b_lines;
 
 	lp = curwp->w_dotp;
@@ -181,7 +189,11 @@ forwline(int f, int n)
 		dlp = lforw(dlp);
 		if (dlp == curbp->b_headp) {
 			curwp->w_dotp = lback(dlp);
+#ifdef UTF8
+			curwp->w_doto = llength_utf8(curwp->w_dotp);
+#else
 			curwp->w_doto = llength(curwp->w_dotp);
+#endif /* UTF8 */
 			curwp->w_rflag |= WFMOVE;
 			return (TRUE);
 		}

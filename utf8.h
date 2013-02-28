@@ -1,6 +1,8 @@
 #ifndef UTF8_H
 #define UTF8_H
 
+#define llength_utf8(lp) (utf8_nlength((lp)->l_text, (lp)->l_used))
+
 int utf8_bytes(char *line, int index, int counts);
 int utf8_length(char *line);
 int utf8_nlength(char *line, int size);
