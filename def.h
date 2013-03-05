@@ -267,6 +267,9 @@ struct buffer {
 	int		 b_dotline;	/* Line number of dot */
 	int		 b_markline;	/* Line number of mark */
 	int		 b_lines;	/* Number of lines in file	*/
+#ifdef UTF8
+	char             b_encoding[NLINE]; /* file encoding */
+#endif /* UTF8 */
 };
 #define b_bufp	b_list.l_p.x_bp
 #define b_bname b_list.l_name

@@ -50,7 +50,7 @@ mrb_s_dired_backup_unflag(mrb_state *mrb, mrb_value self)
 
 
 int
-mrb_load(char *fname)
+mrb_mg_load(char *fname)
 {
      FILE *f;
      
@@ -142,6 +142,7 @@ mrb_mg_init()
 
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
+    mrb_autoexec_init(mrb);
 
 }
 

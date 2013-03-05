@@ -19,23 +19,6 @@ extern int indentmode(int, int);
 extern int makebkfile(int, int);
 extern int setfillcol(int, int);
 
-/*
-     auto‐execute
-            Register an auto‐execute hook; that is, specify a filename pattern
-            (conforming to the shell’s filename globbing rules) and an associ‐
-            ated function to execute when a file matching the specified pat‐
-            tern is read into a buffer.
-*/
-mrb_value
-mrb_s_auto_execute(mrb_state *mrb, mrb_value self)
-{
-     mrb_value pat, func;
-     int s;
-     mrb_get_args(mrb, "SS", &pat, &func);
-     if ((s = add_autoexec(RSTRING_PTR(pat), RSTRING_PTR(func))) != TRUE)
-	  return mrb_fixnum_value(s);
-     return mrb_true_value();
-}
 
 /*
      auto‐indent‐mode
@@ -205,8 +188,6 @@ mrb_extend_init(mrb_state *mrb)
 
     mg = mrb_class_get(mrb, "MG");
 
-    mrb_define_module_function(mrb, mg, "auto_execute",
-			       mrb_s_auto_execute, ARGS_REQ(2));
     mrb_define_module_function(mrb, mg, "auto_indent_mode=", 
 			       mrb_s_auto_indent_mode, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "backward_char",
@@ -679,7 +660,7 @@ mrb_extend_init(mrb_state *mrb)
      toggle‐read‐only
             Toggle the read‐only flag on the current buffer.
 
-     transpose‐chars
+     transpose-chars
             Transpose the two characters on either side of dot.  If dot is at
             the end of the line, transpose the two characters before it.
             Return with an error if dot is at the beginning of line; it seems
@@ -689,34 +670,34 @@ mrb_extend_init(mrb_state *mrb)
             vening command, move the undo pointer to the previous action and
             undo it.
 
-     undo‐boundary
+     undo-boundary
             Add an undo boundary.  This is not usually done interactively.
 
-     undo‐boundary‐toggle
+     undo-boundary-toggle
             Toggle whether undo boundaries are generated.  Undo boundaries are
             often disabled before operations that should be considered atomi‐
             cally undoable.
 
-     undo‐enable
+     undo-enable
             Toggle whether undo information is kept.
 
-     undo‐list
+     undo-list
             Show the undo records for the current buffer in a new buffer.
 
-     universal‐argument
+     universal-argument
             Repeat the next command 4 times.  Usually bound to C‐u.  This com‐
             mand may be stacked; e.g. C‐u C‐u C‐f moves the cursor forward 16
             characters.
 
-     upcase‐region
+     upcase-region
             Upper case region.  Change all of the lower case characters in the
             region to upper case.
 
-     upcase‐word
+     upcase-word
             Move the cursor forward by the specified number of words.  As it
             moves, convert any characters to upper case.
 
-     what‐cursor‐position
+     what-cursor-position
             Display a bunch of useful information about the current location
             of dot.  The character under the cursor (in octal), the current
             line, row, and column, and approximate position of the cursor in
@@ -724,7 +705,7 @@ mrb_extend_init(mrb_state *mrb)
             assumes an infinite position display; it does not truncate just
             because the screen does.
 
-     write‐file
+     write-file
             Ask for a file name and write the contents of the current buffer
             to that file.  Update the remembered file name and clear the
             buffer changed flag.

@@ -110,7 +110,7 @@ main(int argc, char **argv)
 	/* user startup file */
 #ifdef MRUBY
 	if ((cp = startupfile("mrb")) != NULL)
-		mrb_load(cp);
+		mrb_mg_load(cp);
 #else
 	if ((cp = startupfile(NULL)) != NULL)
 		(void)load(cp);

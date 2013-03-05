@@ -649,7 +649,7 @@ evalfile(int f, int n)
 	else if (bufp[0] == '\0')
 		return (FALSE);
 #ifdef MRUBY
-	return (mrb_load(fname));
+	return (mrb_mg_load(fname));
 #else
 	return (load(fname));
 #endif /* MRUBY */

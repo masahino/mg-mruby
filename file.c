@@ -7,6 +7,9 @@
  */
 
 #include "def.h"
+#ifdef MRUBY
+#include "mrb_autoexec.h"
+#endif /* MRUBY */
 
 #include <sys/stat.h>
 
