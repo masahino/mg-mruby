@@ -5,9 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-//#include "estruct.h"
-//#include "edef.h"
-//#include "efunc.h
+
 #include "def.h"
 #include "funmap.h"
 #include "kbd.h"
@@ -19,10 +17,12 @@
 #include "mruby/string.h"
 #include "mruby/class.h"
 #include "mruby/compile.h"
+#include "mruby/dump.h"
 
 #include "mrb_mg.h"
 #include "mrb_mode.h"
 #include "mrb_extend.h"
+#include "mrb_autoexec.h"
 
 mrb_state *mrb;
 
@@ -35,6 +35,12 @@ mrb_s_debug_log(mrb_state *mrb, mrb_value self)
      cstr = strndup(RSTRING_PTR(value), RSTRING_LEN(value));
      fprintf(stderr, "[debug]%s\n", cstr);
      return self;
+}
+
+mrb_value
+mrb_s_buffer_string(mrb_state *mrb, mrb_value self)
+{
+     return mrb_str_new(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
 }
 
 mrb_value
@@ -116,11 +122,10 @@ mrb_s_indent(mrb_state *mrb, mrb_value self)
 void
 mrb_mg_init()
 {
-     struct RClass *kernel, *mg, *object;
+     struct RClass *mg;
 
      mrb = mrb_open();
 
-//    kernel = mrb_class_get(mrb, "Kernel");
     mg = mrb_define_module(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "dired_backup_unflag=", 
@@ -128,6 +133,10 @@ mrb_mg_init()
 
     mrb_define_module_function(mrb, mg, "debug_log", 
 			       mrb_s_debug_log, ARGS_REQ(1));
+
+    /* buffer_string */
+    mrb_define_module_function(mrb, mg, "buffer_string",
+			       mrb_s_buffer_string, ARGS_NONE());
 
     /* match.c */
     mrb_define_module_function(mrb, mg, "showmatch",
@@ -140,10 +149,10 @@ mrb_mg_init()
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
 
+
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
     mrb_autoexec_init(mrb);
-
 }
 
 //#endif

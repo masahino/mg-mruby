@@ -46,6 +46,16 @@ mrb_s_backward_char(mrb_state *mrb, mrb_value self)
      return mrb_fixnum_value(backchar(FFRAND, n_value));
 }
 
+/*
+     beginning‐of‐buffer
+            Move cursor to the top of the buffer.
+*/
+mrb_value
+mrb_s_begining_of_buffer(mrb_state *mrb, mrb_value self)
+{
+     gotobob(FFRAND, 1);
+     return mrb_true_value();
+}
 
 /*
      delete‐backward‐char
@@ -102,14 +112,38 @@ mrb_value mrb_s_insert(mrb_state *mrb, mrb_value self)
      len = RSTRING_LEN(str);
      cstr = strndup(RSTRING_PTR(str), len);
      ret = linsert_str(cstr, len);
+fprintf(stderr, "cstr = %s, len = %d, ret = %d\n", cstr, len, ret);
      return mrb_fixnum_value(ret);
 }
 
+/*
+     kill‐line
+            Kill line.  If called without an argument, it kills from dot to
+            the end of the line, unless it is at the end of the line, when it
+            kills the newline.  If called with an argument of 0, it kills from
+            the start of the line to dot.  If called with a positive argument,
+            it kills from dot forward over that number of newlines.  If called
+            with a negative argument it kills any text before dot on the cur‐
+            rent line, then it kills back abs(n) lines.
+*/
+mrb_value
+mrb_s_kill_line(mrb_state *mrb, mrb_value self)
+{
+     mrb_int n_value = 1;
+     int ret;
+
+     mrb_get_args(mrb, "|i", &n_value);
+     
+     ret = killline(FFRAND, n_value);
+     return mrb_fixnum_value(ret);
+
+}
 
 /*
      load   Prompt the user for a filename, and then execute commands from
             that file.
 */
+/*
 mrb_value
 mrb_s_load(mrb_state *mrb, mrb_value self)
 {
@@ -117,6 +151,7 @@ mrb_s_load(mrb_state *mrb, mrb_value self)
      mrb_get_args(mrb, "S", &fname);
      return mrb_fixnum_value(mrb_load(RSTRING_PTR(fname)));
 }
+*/
 
 /*
      make‐backup‐files
@@ -130,6 +165,27 @@ mrb_s_make_backup_files(mrb_state *mrb, mrb_value self)
      makebkfile(0, mrb_type(value));
      return mrb_nil_value();
 }
+
+/*
+     next‐line
+            Move forward n lines.
+*/
+mrb_value
+mrb_s_next_line(mrb_state *mrb, mrb_value self)
+{
+     mrb_int n_value = 1;
+     int cur_line;
+     int ret;
+
+     mrb_get_args(mrb, "|i", &n_value);
+     
+     cur_line = curwp->w_dotline;
+     ret = forwline(FFRAND, n_value);
+     if (curwp->w_dotline == cur_line)
+	  return mrb_false_value();
+     return mrb_true_value();
+}
+
 
 /*
      newline
@@ -181,6 +237,63 @@ mrb_s_set_fill_column(mrb_state *mrb, mrb_value self)
      return mrb_nil_value();
 }
 
+/*
+     switch‐to‐buffer
+            Prompt and switch to a new buffer in the current window.
+*/
+mrb_value
+mrb_s_switch_to_buffer(mrb_state *mrb, mrb_value self)
+{
+     mrb_value mrb_bufname;
+     char *bufname;
+     struct buffer *bp;
+     mrb_get_args(mrb, "S", &mrb_bufname);
+     
+     bufname = strndup(RSTRING_PTR(mrb_bufname), RSTRING_LEN(mrb_bufname));
+     if (bufname == NULL)
+	  return mrb_fixnum_value(ABORT);
+     if (bufname[0] == '\0' && curbp->b_altb != NULL)
+	  bp = curbp->b_altb;
+     else if ((bp = bfind(bufname, TRUE)) == NULL)
+	  return mrb_false_value();
+
+     /* and put it in current window */
+     curbp = bp;
+     return mrb_fixnum_value(showbuffer(bp, curwp, WFFRAME| WFFULL));
+}
+
+/*
+     switch‐to‐buffer‐other‐window
+            Switch to buffer in another window.
+*/
+mrb_value
+mrb_s_switch_to_buffer_other_window(mrb_state *mrb, mrb_value self)
+{
+     mrb_value mrb_bufname;
+     char *bufname;
+     struct buffer *bp;
+     struct mgwin  *wp;
+     mrb_get_args(mrb, "S", &mrb_bufname);
+     
+     bufname = strndup(RSTRING_PTR(mrb_bufname), RSTRING_LEN(mrb_bufname));
+
+     if (bufname == NULL)
+	  return mrb_fixnum_value(ABORT);
+     if (bufname[0] == '\0' && curbp->b_altb != NULL)
+	  bp = curbp->b_altb;
+     else if ((bp = bfind(bufname, TRUE)) == NULL)
+	  return mrb_false_value();
+
+     if (bp == curbp)
+	  return mrb_fixnum_value(splitwind(FFRAND, 1));
+     /* and put it in a new, non-ephemeral window */
+     if ((wp = popbuf(bp, WNONE)) == NULL)
+	  return mrb_false_value();
+     curbp = bp;
+     curwp = wp;
+     return mrb_true_value();
+}
+
 void
 mrb_extend_init(mrb_state *mrb)
 {
@@ -200,10 +313,14 @@ mrb_extend_init(mrb_state *mrb)
 			       mrb_s_global_set_key, ARGS_REQ(2));
     mrb_define_module_function(mrb, mg, "insert",
 			       mrb_s_insert, ARGS_REQ(1));
+    mrb_define_module_function(mrb, mg, "kill_line",
+			       mrb_s_kill_line, ARGS_OPT(1));
 //    mrb_define_module_function(mrb, kernel, "load",
 //			       mrb_s_load, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "make_backup_files=", 
 			       mrb_s_make_backup_files, ARGS_REQ(1));
+    mrb_define_module_function(mrb, mg, "next_line",
+			       mrb_s_next_line, ARGS_OPT(1));
     mrb_define_module_function(mrb, mg, "newline",
 			       mrb_s_newline, ARGS_OPT(1));
     mrb_define_module_function(mrb, mg, "recenter",
@@ -212,6 +329,10 @@ mrb_extend_init(mrb_state *mrb)
 			       mrb_s_redraw_display, ARGS_NONE());
     mrb_define_module_function(mrb, mg, "set_fill_column", 
 			       mrb_s_set_fill_column, ARGS_REQ(1));
+    mrb_define_module_function(mrb, mg, "switch_to_buffer",
+			       mrb_s_switch_to_buffer, ARGS_REQ(1));
+    mrb_define_module_function(mrb, mg, "switch_to_buffer_other_window",
+			       mrb_s_switch_to_buffer_other_window, ARGS_REQ(1));
 }
 
 /*
@@ -239,8 +360,6 @@ mrb_extend_init(mrb_state *mrb)
      backward‐word
             Move cursor backwards by the specified number of words.
 
-     beginning‐of‐buffer
-            Move cursor to the top of the buffer.
 
      beginning‐of‐line
             Move cursor to the beginning of the line.
@@ -451,15 +570,6 @@ mrb_extend_init(mrb_state *mrb)
             and end with an asterisk, prompt the user if the buffer has been
             changed.
 
-     kill‐line
-            Kill line.  If called without an argument, it kills from dot to
-            the end of the line, unless it is at the end of the line, when it
-            kills the newline.  If called with an argument of 0, it kills from
-            the start of the line to dot.  If called with a positive argument,
-            it kills from dot forward over that number of newlines.  If called
-            with a negative argument it kills any text before dot on the cur‐
-            rent line, then it kills back abs(n) lines.
-
      kill‐paragraph
             Delete n paragraphs starting with the current one.
 
@@ -493,9 +603,6 @@ mrb_extend_init(mrb_state *mrb)
             Insert a newline, then enough tabs and spaces to duplicate the
             indentation of the previous line.  Assumes tabs are every eight
             characters.
-
-     next‐line
-            Move forward n lines.
 
      no‐tab‐mode
             Toggle notab mode.  In this mode, spaces are inserted rather than
@@ -650,12 +757,6 @@ mrb_extend_init(mrb_state *mrb)
 
      suspend‐emacs
             Suspend mmgg and switch back to alternate screen, if in use.
-
-     switch‐to‐buffer
-            Prompt and switch to a new buffer in the current window.
-
-     switch‐to‐buffer‐other‐window
-            Switch to buffer in another window.
 
      toggle‐read‐only
             Toggle the read‐only flag on the current buffer.

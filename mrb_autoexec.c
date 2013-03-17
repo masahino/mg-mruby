@@ -49,7 +49,7 @@ mrb_autoexec(int f, int n, int i)
      fprintf(stderr, "mrb_autoexec1\n");
      mrb_yield(mrb, 
 	       mrb_autos[i].callback,
-	       mrb_str_new2(mrb, mrb_autos[i].pattern));
+	       mrb_str_new_cstr(mrb, mrb_autos[i].pattern));
      return TRUE;
 }
 
