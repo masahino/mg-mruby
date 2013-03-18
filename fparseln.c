@@ -1,3 +1,4 @@
+#include <stdio.h>
 char *
 fparseln(FILE *stream, size_t *len, size_t *lineno, const char delim[3], int flags)
 {
