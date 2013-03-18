@@ -143,15 +143,13 @@ mrb_s_kill_line(mrb_state *mrb, mrb_value self)
      load   Prompt the user for a filename, and then execute commands from
             that file.
 */
-/*
 mrb_value
 mrb_s_load(mrb_state *mrb, mrb_value self)
 {
      mrb_value fname;
      mrb_get_args(mrb, "S", &fname);
-     return mrb_fixnum_value(mrb_load(RSTRING_PTR(fname)));
+     return mrb_fixnum_value(mrb_mg_load(RSTRING_PTR(fname)));
 }
-*/
 
 /*
      make‐backup‐files
@@ -315,8 +313,8 @@ mrb_extend_init(mrb_state *mrb)
 			       mrb_s_insert, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "kill_line",
 			       mrb_s_kill_line, ARGS_OPT(1));
-//    mrb_define_module_function(mrb, kernel, "load",
-//			       mrb_s_load, ARGS_REQ(1));
+    mrb_define_module_function(mrb, mg, "load",
+			       mrb_s_load, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "make_backup_files=", 
 			       mrb_s_make_backup_files, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "next_line",
