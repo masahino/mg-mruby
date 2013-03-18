@@ -88,7 +88,9 @@ EOF
 	add_inc HAVE_ARC4RANDOM_EXT
 	extralibs="$extralibs -larc4random"
     else
-	echo Not Found.
+	echo 'Not Found, adding.'
+	add_inc HAVE_NOARC4RANDOM
+	extraobjs="$extraobjs arc4random.o"
     fi
 fi
 
