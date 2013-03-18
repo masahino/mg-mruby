@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <term.h>
