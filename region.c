@@ -400,8 +400,8 @@ region_put_data(const char *buf, int len)
 {
 	int i;
 #ifdef UTF8
+	char *tmp_s;
 	int size;
-	char tmp_s[4];
 #endif /* UTF8 */
 
 #ifdef UTF8
@@ -411,7 +411,8 @@ region_put_data(const char *buf, int len)
 		  lnewline();
 		  i++;
 	     } else {
-		  size = utf8_bytes(buf, i, 1);
+		  tmp_s = (char *)buf;
+		  size = utf8_bytes(tmp_s, i, 1);
 		  linsert_str(&buf[i], size);
 		  i += size;
 	     }
