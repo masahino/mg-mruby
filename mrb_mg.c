@@ -23,6 +23,7 @@
 #include "mrb_mode.h"
 #include "mrb_extend.h"
 #include "mrb_autoexec.h"
+#include "mrb_buffer.h"
 
 mrb_state *mrb;
 
@@ -153,6 +154,7 @@ mrb_mg_init()
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
     mrb_autoexec_init(mrb);
+    mrb_buffer_init(mrb);
 }
 
 //#endif

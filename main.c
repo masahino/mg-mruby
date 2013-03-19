@@ -109,7 +109,7 @@ main(int argc, char **argv)
 
 	/* user startup file */
 #ifdef MRUBY
-	if ((cp = startupfile("mrb")) != NULL)
+	if ((cp = startupfile(NULL)) != NULL)
 		mrb_mg_load(cp);
 #else
 	if ((cp = startupfile(NULL)) != NULL)

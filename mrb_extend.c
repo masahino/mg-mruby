@@ -112,7 +112,6 @@ mrb_value mrb_s_insert(mrb_state *mrb, mrb_value self)
      len = RSTRING_LEN(str);
      cstr = strndup(RSTRING_PTR(str), len);
      ret = linsert_str(cstr, len);
-fprintf(stderr, "cstr = %s, len = %d, ret = %d\n", cstr, len, ret);
      return mrb_fixnum_value(ret);
 }
 
