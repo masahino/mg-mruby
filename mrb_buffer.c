@@ -36,9 +36,6 @@ mrb_buffer_get_name(mrb_state *mrb, mrb_value self)
 mrb_value
 mrb_buffer_get_current(mrb_state *mrb, mrb_value self)
 {
-	mrb_value mrb_buf_name;
-	char *buf_name;
-
 	if (curbp != NULL) 
 		return mrb_obj_value(Data_Wrap_Struct(mrb, mrb_class_ptr(self), &mrb_buffer_type, curbp));
 	else

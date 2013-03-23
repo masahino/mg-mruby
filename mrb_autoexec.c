@@ -129,7 +129,7 @@ mrb_autoexec9(int f, int n)
             tern is read into a buffer.
 */
 mrb_value
-mrb_s_auto_execute(mrb_state *mrb, mrb_value self)
+mrb_auto_execute(mrb_state *mrb, mrb_value self)
 {
      mrb_value pat, block;
      int s;
@@ -169,6 +169,6 @@ mrb_autoexec_init(mrb_state *mrb)
     mg = mrb_class_get(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "auto_execute",
-			       mrb_s_auto_execute, ARGS_REQ(2));
+			       mrb_auto_execute, ARGS_REQ(2));
 
 }

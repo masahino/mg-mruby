@@ -28,7 +28,7 @@
 mrb_state *mrb;
 
 mrb_value
-mrb_s_debug_log(mrb_state *mrb, mrb_value self)
+mrb_debug_log(mrb_state *mrb, mrb_value self)
 {
      mrb_value value;
      char *cstr;
@@ -39,13 +39,13 @@ mrb_s_debug_log(mrb_state *mrb, mrb_value self)
 }
 
 mrb_value
-mrb_s_buffer_string(mrb_state *mrb, mrb_value self)
+mrb_buffer_string(mrb_state *mrb, mrb_value self)
 {
      return mrb_str_new(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
 }
 
 mrb_value
-mrb_s_dired_backup_unflag(mrb_state *mrb, mrb_value self)
+mrb_dired_backup_unflag(mrb_state *mrb, mrb_value self)
 {
      PF func;
      mrb_value value;
@@ -60,6 +60,7 @@ int
 mrb_mg_load(char *fname)
 {
      FILE *f;
+     mrb_value v;
      
      if ((fname = adjustname(fname, TRUE)) == NULL) {
 	  /* just to be careful */
@@ -69,11 +70,20 @@ mrb_mg_load(char *fname)
      if (f != NULL) {
 	  if (strlen(fname) > 4 &&
 	      strcmp(&fname[strlen(fname)-4], ".mrb") == 0) {
-	       mrb_load_irep_file(mrb, f);
+	       v = mrb_load_irep_file(mrb, f);
 	  } else {
-	       mrb_load_file(mrb, f);
+	       v = mrb_load_file(mrb, f);
 	  }
 	  fclose(f);
+	  if (mrb->exc) {
+              if (!mrb_undef_p(v)) {
+		       mrb_value obj, obj2;
+		       obj = mrb_obj_value(mrb->exc);
+//		       obj2 = mrb_funcall(mrb, obj, "inspect", 0);
+		printf("%s\n", RSTRING_PTR(mrb_any_to_s(mrb, obj)));
+                  return FALSE;
+	      }
+	  }
 	  return TRUE;
      }
      return FALSE;
@@ -99,7 +109,7 @@ mrb_evalbuffer(int f, int n)
 
 /* match.c */
 mrb_value
-mrb_s_showmatch(mrb_state *mrb, mrb_value self)
+mrb_showmatch(mrb_state *mrb, mrb_value self)
 {
      mrb_value f, n;
      int ret;
@@ -110,7 +120,7 @@ mrb_s_showmatch(mrb_state *mrb, mrb_value self)
 
 /* random.c */
 mrb_value
-mrb_s_indent(mrb_state *mrb, mrb_value self)
+mrb_indent(mrb_state *mrb, mrb_value self)
 {
      mrb_value n;
      int ret;
@@ -130,31 +140,31 @@ mrb_mg_init()
     mg = mrb_define_module(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "dired_backup_unflag=", 
-			       mrb_s_dired_backup_unflag, ARGS_REQ(1));
+			       mrb_dired_backup_unflag, ARGS_REQ(1));
 
     mrb_define_module_function(mrb, mg, "debug_log", 
-			       mrb_s_debug_log, ARGS_REQ(1));
+			       mrb_debug_log, ARGS_REQ(1));
 
     /* buffer_string */
     mrb_define_module_function(mrb, mg, "buffer_string",
-			       mrb_s_buffer_string, ARGS_NONE());
+			       mrb_buffer_string, ARGS_NONE());
 
     /* match.c */
     mrb_define_module_function(mrb, mg, "showmatch",
-			       mrb_s_showmatch, ARGS_REQ(2));
+			       mrb_showmatch, ARGS_REQ(2));
 
     /* random.c */
     mrb_define_module_function(mrb, mg, "indent",
-			       mrb_s_indent, ARGS_REQ(1));
+			       mrb_indent, ARGS_REQ(1));
 
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
-
 
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
     mrb_autoexec_init(mrb);
     mrb_buffer_init(mrb);
+
 }
 
 //#endif
