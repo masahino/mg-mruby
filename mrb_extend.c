@@ -26,7 +26,7 @@ extern int setfillcol(int, int);
             line.
 */
 mrb_value
-mrb_auto_indent_mode(mrb_state *mrb, mrb_value self)
+mrb_mg_auto_indent_mode(mrb_state *mrb, mrb_value self)
 {
      mrb_value value;
      mrb_get_args(mrb, "o", &value);
@@ -39,7 +39,7 @@ mrb_auto_indent_mode(mrb_state *mrb, mrb_value self)
             Move cursor backwards one character.
 */
 mrb_value
-mrb_backward_char(mrb_state *mrb, mrb_value self)
+mrb_mg_backward_char(mrb_state *mrb, mrb_value self)
 {
      mrb_int n_value = 1;
      mrb_get_args(mrb, "|i", &n_value);
@@ -51,7 +51,7 @@ mrb_backward_char(mrb_state *mrb, mrb_value self)
             Move cursor to the top of the buffer.
 */
 mrb_value
-mrb_begining_of_buffer(mrb_state *mrb, mrb_value self)
+mrb_mg_begining_of_buffer(mrb_state *mrb, mrb_value self)
 {
      gotobob(FFRAND, 1);
      return mrb_true_value();
@@ -63,7 +63,7 @@ mrb_begining_of_buffer(mrb_state *mrb, mrb_value self)
             does a kill if presented with an argument.
 */
 mrb_value
-mrb_delete_backward_char(mrb_state *mrb, mrb_value self)
+mrb_mg_delete_backward_char(mrb_state *mrb, mrb_value self)
 {
      mrb_int n_value = 1;
      mrb_get_args(mrb, "|i", &n_value);
@@ -75,7 +75,7 @@ mrb_delete_backward_char(mrb_state *mrb, mrb_value self)
             Move cursor to the end of the buffer.
 */
 mrb_value
-mrb_end_of_buffer(mrb_state *mrb, mrb_value self)
+mrb_mg_end_of_buffer(mrb_state *mrb, mrb_value self)
 {
      gotoeob(FFRAND, 1);
      return mrb_true_value();
@@ -87,7 +87,7 @@ mrb_end_of_buffer(mrb_state *mrb, mrb_value self)
             ters.  Returns an error if the end of buffer is reached.
 */
 mrb_value
-mrb_forward_char(mrb_state *mrb, mrb_value self)
+mrb_mg_forward_char(mrb_state *mrb, mrb_value self)
 {
      mrb_int n_value = 1;
      mrb_get_args(mrb, "|i", &n_value);
@@ -100,7 +100,7 @@ mrb_forward_char(mrb_state *mrb, mrb_value self)
             Bind a key in the global (fundamental) key map.
 */
 mrb_value
-mrb_global_set_key(mrb_state *mrb, mrb_value self)
+mrb_mg_global_set_key(mrb_state *mrb, mrb_value self)
 {
      mrb_value key, func;
      int ret;
@@ -114,7 +114,7 @@ mrb_global_set_key(mrb_state *mrb, mrb_value self)
     insert
             Insert a string, mainly for use from macros.
 */
-mrb_value mrb_insert(mrb_state *mrb, mrb_value self)
+mrb_value mrb_mg_insert(mrb_state *mrb, mrb_value self)
 {
      mrb_value str;
      char *cstr;
@@ -137,7 +137,7 @@ mrb_value mrb_insert(mrb_state *mrb, mrb_value self)
             rent line, then it kills back abs(n) lines.
 */
 mrb_value
-mrb_kill_line(mrb_state *mrb, mrb_value self)
+mrb_mg_kill_line(mrb_state *mrb, mrb_value self)
 {
      mrb_int n_value = 1;
      int ret;
@@ -164,12 +164,28 @@ mrb_mg_load(mrb_state *mrb, mrb_value self)
      return mrb_fixnum_value(mrb_mg_load(s));
 }
 */
+
+/*
+     local-set-key
+            Bind a key mapping in the local (topmost) mode.
+*/
+mrb_value
+mrb_mg_local_set_key(mrb_state *mrb, mrb_value self)
+{
+     mrb_value key, func;
+     int ret;
+
+     mrb_get_args(mrb, "SS", &key, &func);
+     ret = dobindkey(curbp->b_modes[curbp->b_nmodes]->p_map, RSTRING_PTR(func), RSTRING_PTR(key));
+     return mrb_fixnum_value(ret);
+}
+
 /*
      make-backup-files
             Toggle generation of backup files.
 */
 mrb_value
-mrb_make_backup_files(mrb_state *mrb, mrb_value self)
+mrb_mg_make_backup_files(mrb_state *mrb, mrb_value self)
 {
      mrb_value value;
      mrb_get_args(mrb, "o", &value);
@@ -182,7 +198,7 @@ mrb_make_backup_files(mrb_state *mrb, mrb_value self)
             Move forward n lines.
 */
 mrb_value
-mrb_next_line(mrb_state *mrb, mrb_value self)
+mrb_mg_next_line(mrb_state *mrb, mrb_value self)
 {
      mrb_int n_value = 1;
      int cur_line;
@@ -203,7 +219,7 @@ mrb_next_line(mrb_state *mrb, mrb_value self)
             Insert a newline into the current buffer.
 */
 mrb_value
-mrb_newline(mrb_state *mrb, mrb_value self)
+mrb_mg_newline(mrb_state *mrb, mrb_value self)
 {
      mrb_int n_value = 1;
      mrb_get_args(mrb, "|i", &n_value);
@@ -218,7 +234,7 @@ mrb_newline(mrb_state *mrb, mrb_value self)
             tom.
 */
 mrb_value
-mrb_recenter(mrb_state *mrb, mrb_value self)
+mrb_mg_recenter(mrb_state *mrb, mrb_value self)
 {
      int ret;
      ret = reposition(FFRAND, 0);
@@ -230,7 +246,7 @@ mrb_recenter(mrb_state *mrb, mrb_value self)
             thing has changed.
 */
 mrb_value
-mrb_redraw_display(mrb_state *mrb, mrb_value self)
+mrb_mg_redraw_display(mrb_state *mrb, mrb_value self)
 {
      return mrb_fixnum_value(redraw(FFRAND, 0));
 }
@@ -240,7 +256,7 @@ mrb_redraw_display(mrb_state *mrb, mrb_value self)
             Prompt the user for a fill column.  Used by auto-fill-mode.
 */
 mrb_value
-mrb_set_fill_column(mrb_state *mrb, mrb_value self)
+mrb_mg_set_fill_column(mrb_state *mrb, mrb_value self)
 {
      mrb_value value;
      mrb_get_args(mrb, "i", &value);
@@ -253,7 +269,7 @@ mrb_set_fill_column(mrb_state *mrb, mrb_value self)
             Prompt and switch to a new buffer in the current window.
 */
 mrb_value
-mrb_switch_to_buffer(mrb_state *mrb, mrb_value self)
+mrb_mg_switch_to_buffer(mrb_state *mrb, mrb_value self)
 {
      mrb_value mrb_bufname;
      char *bufname;
@@ -278,7 +294,7 @@ mrb_switch_to_buffer(mrb_state *mrb, mrb_value self)
             Switch to buffer in another window.
 */
 mrb_value
-mrb_switch_to_buffer_other_window(mrb_state *mrb, mrb_value self)
+mrb_mg_switch_to_buffer_other_window(mrb_state *mrb, mrb_value self)
 {
      mrb_value mrb_bufname;
      char *bufname;
@@ -313,41 +329,43 @@ mrb_extend_init(mrb_state *mrb)
     mg = mrb_class_get(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "auto_indent_mode=", 
-			       mrb_auto_indent_mode, ARGS_REQ(1));
+			       mrb_mg_auto_indent_mode, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "backward_char",
-			       mrb_backward_char, ARGS_OPT(1));
+			       mrb_mg_backward_char, ARGS_OPT(1));
     mrb_define_module_function(mrb, mg, "begining_of_buffer",
-                               mrb_begining_of_buffer, ARGS_NONE());
+                               mrb_mg_begining_of_buffer, ARGS_NONE());
     mrb_define_module_function(mrb, mg, "delete_backward_char",
-			       mrb_delete_backward_char, ARGS_OPT(1));
+			       mrb_mg_delete_backward_char, ARGS_OPT(1));
     mrb_define_module_function(mrb, mg, "end_of_buffer",
-                               mrb_end_of_buffer, ARGS_NONE());
+                               mrb_mg_end_of_buffer, ARGS_NONE());
     mrb_define_module_function(mrb, mg, "forward_char",
-			       mrb_forward_char, ARGS_OPT(1));
+			       mrb_mg_forward_char, ARGS_OPT(1));
     mrb_define_module_function(mrb, mg, "global_set_key",
-			       mrb_global_set_key, ARGS_REQ(2));
+			       mrb_mg_global_set_key, ARGS_REQ(2));
     mrb_define_module_function(mrb, mg, "insert",
-			       mrb_insert, ARGS_REQ(1));
+			       mrb_mg_insert, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "kill_line",
-			       mrb_kill_line, ARGS_OPT(1));
+			       mrb_mg_kill_line, ARGS_OPT(1));
 //    mrb_define_module_function(mrb, mg, "load",
-//			       mrb_mg_load, ARGS_REQ(1));
+//			       mrb_mg_mg_load, ARGS_REQ(1));
+    mrb_define_module_function(mrb, mg, "local_set_key",
+			       mrb_mg_local_set_key, ARGS_REQ(2));
     mrb_define_module_function(mrb, mg, "make_backup_files=", 
-			       mrb_make_backup_files, ARGS_REQ(1));
+			       mrb_mg_make_backup_files, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "next_line",
-			       mrb_next_line, ARGS_OPT(1));
+			       mrb_mg_next_line, ARGS_OPT(1));
     mrb_define_module_function(mrb, mg, "newline",
-			       mrb_newline, ARGS_OPT(1));
+			       mrb_mg_newline, ARGS_OPT(1));
     mrb_define_module_function(mrb, mg, "recenter",
-			       mrb_recenter, ARGS_NONE());
+			       mrb_mg_recenter, ARGS_NONE());
     mrb_define_module_function(mrb, mg, "redraw_display",
-			       mrb_redraw_display, ARGS_NONE());
+			       mrb_mg_redraw_display, ARGS_NONE());
     mrb_define_module_function(mrb, mg, "set_fill_column", 
-			       mrb_set_fill_column, ARGS_REQ(1));
+			       mrb_mg_set_fill_column, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "switch_to_buffer",
-			       mrb_switch_to_buffer, ARGS_REQ(1));
+			       mrb_mg_switch_to_buffer, ARGS_REQ(1));
     mrb_define_module_function(mrb, mg, "switch_to_buffer_other_window",
-			       mrb_switch_to_buffer_other_window, ARGS_REQ(1));
+			       mrb_mg_switch_to_buffer_other_window, ARGS_REQ(1));
 }
 
 /*
@@ -597,9 +615,6 @@ mrb_extend_init(mrb_state *mrb)
 
      list-buffers
             Display the list of available buffers.
-
-     local-set-key
-            Bind a key mapping in the local (topmost) mode.
 
      local-unset-key
             Unbind a key mapping in the local (topmost) mode.

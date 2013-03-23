@@ -27,8 +27,9 @@
 
 mrb_state *mrb;
 
+
 mrb_value
-mrb_debug_log(mrb_state *mrb, mrb_value self)
+mrb_mg_debug_log(mrb_state *mrb, mrb_value self)
 {
      mrb_value value;
      char *cstr;
@@ -39,13 +40,13 @@ mrb_debug_log(mrb_state *mrb, mrb_value self)
 }
 
 mrb_value
-mrb_buffer_string(mrb_state *mrb, mrb_value self)
+mrb_mg_buffer_string(mrb_state *mrb, mrb_value self)
 {
      return mrb_str_new(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
 }
 
 mrb_value
-mrb_dired_backup_unflag(mrb_state *mrb, mrb_value self)
+mrb_mg_dired_backup_unflag(mrb_state *mrb, mrb_value self)
 {
      PF func;
      mrb_value value;
@@ -77,7 +78,7 @@ mrb_mg_load(char *fname)
 	  fclose(f);
 	  if (mrb->exc) {
               if (!mrb_undef_p(v)) {
-		       mrb_value obj, obj2;
+		       mrb_value obj;
 		       obj = mrb_obj_value(mrb->exc);
 //		       obj2 = mrb_funcall(mrb, obj, "inspect", 0);
 		printf("%s\n", RSTRING_PTR(mrb_any_to_s(mrb, obj)));
@@ -89,8 +90,41 @@ mrb_mg_load(char *fname)
      return FALSE;
 }
 
+static mrb_value
+mrb_mg_eval_string(mrb_state *mrb, const char *str)
+{
+    mrb_value ret, ret_str;
+    ret = mrb_load_string(mrb, str);
+    ret_str = mrb_funcall(mrb, ret, "to_s", 0);
+    return ret_str;
+}
+
 int
-mrb_evalbuffer(int f, int n)
+mrb_mg_eval_last_sexp(int f, int n)
+{
+    mrb_value ret;
+    ret = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp));
+    ewprintf("%s", (RSTRING_PTR(ret)));
+    return TRUE;
+}
+
+int 
+mrb_mg_eval_print_last_sexp(int f, int n)
+{
+    mrb_value eval_result;
+    int s;
+    eval_result = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp));
+    s = newline(FFRAND, 1);
+    if (s != TRUE) {
+        return FALSE;
+    }
+    s = linsert_str(RSTRING_PTR(eval_result), RSTRING_LEN(eval_result));
+    newline(FFRAND, 1);
+    return TRUE;
+}
+
+int
+mrb_mg_evalbuffer(int f, int n)
 {
      struct line *lp;
      struct buffer *bp = curbp;
@@ -109,7 +143,7 @@ mrb_evalbuffer(int f, int n)
 
 /* match.c */
 mrb_value
-mrb_showmatch(mrb_state *mrb, mrb_value self)
+mrb_mg_showmatch(mrb_state *mrb, mrb_value self)
 {
      mrb_value f, n;
      int ret;
@@ -120,7 +154,7 @@ mrb_showmatch(mrb_state *mrb, mrb_value self)
 
 /* random.c */
 mrb_value
-mrb_indent(mrb_state *mrb, mrb_value self)
+mrb_mg_indent(mrb_state *mrb, mrb_value self)
 {
      mrb_value n;
      int ret;
@@ -140,31 +174,34 @@ mrb_mg_init()
     mg = mrb_define_module(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "dired_backup_unflag=", 
-			       mrb_dired_backup_unflag, ARGS_REQ(1));
+			       mrb_mg_dired_backup_unflag, ARGS_REQ(1));
 
     mrb_define_module_function(mrb, mg, "debug_log", 
-			       mrb_debug_log, ARGS_REQ(1));
+			       mrb_mg_debug_log, ARGS_REQ(1));
 
     /* buffer_string */
     mrb_define_module_function(mrb, mg, "buffer_string",
-			       mrb_buffer_string, ARGS_NONE());
+			       mrb_mg_buffer_string, ARGS_NONE());
 
     /* match.c */
     mrb_define_module_function(mrb, mg, "showmatch",
-			       mrb_showmatch, ARGS_REQ(2));
+			       mrb_mg_showmatch, ARGS_REQ(2));
 
     /* random.c */
     mrb_define_module_function(mrb, mg, "indent",
-			       mrb_indent, ARGS_REQ(1));
+			       mrb_mg_indent, ARGS_REQ(1));
 
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
+
 
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
     mrb_autoexec_init(mrb);
     mrb_buffer_init(mrb);
 
+    funmap_add(mrb_mg_eval_last_sexp, "eval-last-sexp");
+    funmap_add(mrb_mg_eval_print_last_sexp, "eval-print-last-sexp");
 }
 
 //#endif

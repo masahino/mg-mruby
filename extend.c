@@ -612,7 +612,7 @@ int
 evalbuffer(int f, int n)
 {
 #ifdef MRUBY
-        return mrb_evalbuffer(f, n);
+        return mrb_mg_evalbuffer(f, n);
 #else
 	struct line		*lp;
 	struct buffer		*bp = curbp;

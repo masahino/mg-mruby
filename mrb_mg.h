@@ -9,7 +9,7 @@ extern mrb_state *mrb;
 
 void mrb_mg_init();
 int mrb_mg_load(char *fname);
-int mrb_evalbuffer(int f, int n);
+int mrb_mg_evalbuffer(int f, int n);
 
 
 #endif
