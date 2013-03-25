@@ -10,6 +10,10 @@
 
 #include <string.h>
 
+#ifdef UTF8
+#include "utf8.h"
+#endif /* UTF8 */
+
 #ifndef KBLOCK
 #define KBLOCK	256		/* Kill buffer block size.	 */
 #endif
@@ -223,18 +227,40 @@ yank(int f, int n)
 {
 	struct line	*lp;
 	int	 c, i, nline;
+#ifdef UTF8
+	char tmp_str[4];
+	int size, j;
+#endif /* UTF8 */
 
 	if (n < 0)
-		return (FALSE);
+	     return (FALSE);
 
 	/* newline counting */
 	nline = 0;
 
 	undo_boundary_enable(FFRAND, 0);
 	while (n--) {
-		/* mark around last yank */
-		isetmark();
-		i = 0;
+	     /* mark around last yank */
+	     isetmark();
+	     i = 0;
+#ifdef UTF8
+	     while ((c = kremove(i)) >= 0) {
+                 if (c == '\n') {
+	             if (newline(FFRAND, 1) == FALSE)
+		          return (FALSE);
+	             ++nline;
+	             i++;
+                 } else {
+	             tmp_str[0] = (char)c;
+	             size = utf8_bytes(tmp_str, 0, 1);
+	             i++;
+	             for (j = 1; j < size; j++) {
+	                 tmp_str[j] = kremove(i++);
+	             }
+	             linsert_str(tmp_str, size);
+	         }
+	     }
+#else
 		while ((c = kremove(i)) >= 0) {
 			if (c == '\n') {
 				if (newline(FFRAND, 1) == FALSE)
@@ -246,6 +272,7 @@ yank(int f, int n)
 			}
 			++i;
 		}
+#endif /* UTF8 */
 	}
 	/* cosmetic adjustment */
 	lp = curwp->w_linep;
