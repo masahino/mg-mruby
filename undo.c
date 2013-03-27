@@ -74,7 +74,11 @@ find_lo(int pos, struct line **olp, int *offset, int *lnum)
 		lineno++;
 	}
 	*olp = p;
+#ifdef UTF8
+	*offset = utf8_nlength(p->l_text, pos);
+#else
 	*offset = pos;
+#endif /* UTF8 */
 	*lnum = lineno;
 
 	return (TRUE);

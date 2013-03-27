@@ -261,7 +261,11 @@ getgoal(struct line *dlp)
 	char tmp[5];
 
 
+#ifdef UTF8
+	for (i = 0; i < llength_utf8(dlp); i++) {
+#else
 	for (i = 0; i < llength(dlp); i++) {
+#endif /* UTF8*/
 		c = lgetc(dlp, i);
 		if (c == '\t'
 #ifdef	NOTAB
