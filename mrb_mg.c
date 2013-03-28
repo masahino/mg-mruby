@@ -69,6 +69,7 @@ mrb_mg_load(char *fname)
      }
      f = fopen(fname, "r");
      if (f != NULL) {
+	  mrb->exc = 0;
 	  if (strlen(fname) > 4 &&
 	      strcmp(&fname[strlen(fname)-4], ".mrb") == 0) {
 	       v = mrb_load_irep_file(mrb, f);
@@ -94,6 +95,7 @@ static mrb_value
 mrb_mg_eval_string(mrb_state *mrb, const char *str)
 {
     mrb_value ret, ret_str;
+    mrb->exc = 0;
     ret = mrb_load_string(mrb, str);
     ret_str = mrb_funcall(mrb, ret, "to_s", 0);
     return ret_str;
