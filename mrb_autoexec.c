@@ -46,7 +46,6 @@ mrb_autoexec(int f, int n, int i)
      mrb_state *mrb;
 
      mrb = mrb_autos[i].mrb;
-     fprintf(stderr, "mrb_autoexec1\n");
      mrb_yield(mrb, 
 	       mrb_autos[i].callback,
 	       mrb_str_new_cstr(mrb, mrb_autos[i].pattern));
@@ -140,8 +139,6 @@ mrb_auto_execute(mrb_state *mrb, mrb_value self)
      }
 
      mrb_get_args(mrb, "&S", &block, &pat);
-     fprintf(stderr, "pat = %s\n", RSTRING_PTR(mrb_any_to_s(mrb, pat)));
-     fprintf(stderr, "block = %s\n", RSTRING_PTR(mrb_any_to_s(mrb, block)));
 
      mrb_autos[mrb_autoexec_num].mrb = mrb;
      mrb_autos[mrb_autoexec_num].pattern = RSTRING_PTR(pat);
@@ -157,7 +154,6 @@ mrb_auto_execute(mrb_state *mrb, mrb_value self)
      if ((s = add_autoexec(RSTRING_PTR(pat), 
 			   autoexec_name_str)) != TRUE)
 	 return mrb_fixnum_value(s);
-     fprintf(stderr, "mrb_autoexec success\n");
      return mrb_true_value();
 }
 
