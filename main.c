@@ -89,6 +89,10 @@ main(int argc, char **argv)
 		grep_init();
 		theo_init();
 		cmode_init();
+
+#ifdef UTF8
+		utf8_init();
+#endif /* UTF8 */
 	}
 
 	if (init_fcn_name &&

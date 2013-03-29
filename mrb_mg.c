@@ -40,6 +40,14 @@ mrb_mg_debug_log(mrb_state *mrb, mrb_value self)
 }
 
 mrb_value
+mrb_mg_extend(mrb_state *mrb, mrb_value self)
+{
+    mrb_value extend_str;
+    mrb_get_args(mrb, "S", &extend_str);
+    return mrb_fixnum_value(excline(RSTRING_PTR(extend_str)));
+}
+
+mrb_value
 mrb_mg_buffer_string(mrb_state *mrb, mrb_value self)
 {
      return mrb_str_new(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
@@ -92,11 +100,11 @@ mrb_mg_load(char *fname)
 }
 
 static mrb_value
-mrb_mg_eval_string(mrb_state *mrb, const char *str)
+mrb_mg_eval_string(mrb_state *mrb, const char *str, int len)
 {
     mrb_value ret, ret_str;
     mrb->exc = 0;
-    ret = mrb_load_string(mrb, str);
+    ret = mrb_load_nstring(mrb, str, len);
     ret_str = mrb_funcall(mrb, ret, "to_s", 0);
     return ret_str;
 }
@@ -105,7 +113,7 @@ int
 mrb_mg_eval_last_sexp(int f, int n)
 {
     mrb_value ret;
-    ret = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp));
+    ret = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
     ewprintf("%s", (RSTRING_PTR(ret)));
     return TRUE;
 }
@@ -115,7 +123,7 @@ mrb_mg_eval_print_last_sexp(int f, int n)
 {
     mrb_value eval_result;
     int s;
-    eval_result = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp));
+    eval_result = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
     s = newline(FFRAND, 1);
     if (s != TRUE) {
         return FALSE;
@@ -181,6 +189,9 @@ mrb_mg_init()
     mrb_define_module_function(mrb, mg, "debug_log", 
 			       mrb_mg_debug_log, ARGS_REQ(1));
 
+    mrb_define_module_function(mrb, mg, "extend",
+                               mrb_mg_extend, ARGS_REQ(1));
+
     /* buffer_string */
     mrb_define_module_function(mrb, mg, "buffer_string",
 			       mrb_mg_buffer_string, ARGS_NONE());
@@ -202,8 +213,8 @@ mrb_mg_init()
     mrb_autoexec_init(mrb);
     mrb_buffer_init(mrb);
 
-    funmap_add(mrb_mg_eval_last_sexp, "eval-last-sexp");
-    funmap_add(mrb_mg_eval_print_last_sexp, "eval-print-last-sexp");
+    funmap_add(mrb_mg_eval_last_sexp, "eval-last-exp");
+    funmap_add(mrb_mg_eval_print_last_sexp, "eval-print-last-exp");
 }
 
 //#endif
