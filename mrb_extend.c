@@ -264,63 +264,6 @@ mrb_mg_set_fill_column(mrb_state *mrb, mrb_value self)
      return mrb_nil_value();
 }
 
-/*
-     switch-to-buffer
-            Prompt and switch to a new buffer in the current window.
-*/
-mrb_value
-mrb_mg_switch_to_buffer(mrb_state *mrb, mrb_value self)
-{
-     mrb_value mrb_bufname;
-     char *bufname;
-     struct buffer *bp;
-     mrb_get_args(mrb, "S", &mrb_bufname);
-     
-     bufname = strndup(RSTRING_PTR(mrb_bufname), RSTRING_LEN(mrb_bufname));
-     if (bufname == NULL)
-	  return mrb_fixnum_value(ABORT);
-     if (bufname[0] == '\0' && curbp->b_altb != NULL)
-	  bp = curbp->b_altb;
-     else if ((bp = bfind(bufname, TRUE)) == NULL)
-	  return mrb_false_value();
-
-     /* and put it in current window */
-     curbp = bp;
-     return mrb_fixnum_value(showbuffer(bp, curwp, WFFRAME| WFFULL));
-}
-
-/*
-     switch-to-buffer-other-window
-            Switch to buffer in another window.
-*/
-mrb_value
-mrb_mg_switch_to_buffer_other_window(mrb_state *mrb, mrb_value self)
-{
-     mrb_value mrb_bufname;
-     char *bufname;
-     struct buffer *bp;
-     struct mgwin  *wp;
-     mrb_get_args(mrb, "S", &mrb_bufname);
-     
-     bufname = strndup(RSTRING_PTR(mrb_bufname), RSTRING_LEN(mrb_bufname));
-
-     if (bufname == NULL)
-	  return mrb_fixnum_value(ABORT);
-     if (bufname[0] == '\0' && curbp->b_altb != NULL)
-	  bp = curbp->b_altb;
-     else if ((bp = bfind(bufname, TRUE)) == NULL)
-	  return mrb_false_value();
-
-     if (bp == curbp)
-	  return mrb_fixnum_value(splitwind(FFRAND, 1));
-     /* and put it in a new, non-ephemeral window */
-     if ((wp = popbuf(bp, WNONE)) == NULL)
-	  return mrb_false_value();
-     curbp = bp;
-     curwp = wp;
-     return mrb_true_value();
-}
-
 void
 mrb_extend_init(mrb_state *mrb)
 {
@@ -362,10 +305,6 @@ mrb_extend_init(mrb_state *mrb)
 			       mrb_mg_redraw_display, ARGS_NONE());
     mrb_define_module_function(mrb, mg, "set_fill_column", 
 			       mrb_mg_set_fill_column, ARGS_REQ(1));
-    mrb_define_module_function(mrb, mg, "switch_to_buffer",
-			       mrb_mg_switch_to_buffer, ARGS_REQ(1));
-    mrb_define_module_function(mrb, mg, "switch_to_buffer_other_window",
-			       mrb_mg_switch_to_buffer_other_window, ARGS_REQ(1));
 }
 
 /*
@@ -783,7 +722,13 @@ mrb_extend_init(mrb_state *mrb)
             invoking end-kbd-macro.
 
      suspend-emacs
-            Suspend mmgg and switch back to alternate screen, if in use.
+            Suspend mg and switch back to alternate screen, if in use.
+
+     switch-to-buffer
+            Prompt and switch to a new buffer in the current window.
+
+     switch-to-buffer-other-window
+            Switch to buffer in another window.
 
      toggle-read-only
             Toggle the read-only flag on the current buffer.

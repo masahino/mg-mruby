@@ -57,12 +57,24 @@ mrb_mg_method_missing(mrb_state *mrb, mrb_value self)
      mrb_get_args(mrb, "o*", &name, &a, &alen);
      
      mg_name = mrb_sym2str(mrb, mrb_symbol(name));
-     mg_name = mrb_funcall(mrb, mg_name, "sub", 2, 
+     mg_name = mrb_funcall(mrb, mg_name, "gsub", 2, 
 			   mrb_str_new_cstr(mrb, "_"), 
 			   mrb_str_new_cstr(mrb, "-"));
      for (i = 0; i < alen; i++) {
 	  mg_name = mrb_str_plus(mrb, mg_name, mrb_str_new_cstr(mrb, " "));
-	  mg_name = mrb_str_plus(mrb, mg_name, mrb_obj_as_string(mrb, a[i]));
+	  switch (mrb_type(a[i])) {
+	  case MRB_TT_STRING:
+	       mg_name = mrb_str_plus(mrb, mg_name, mrb_str_new_cstr(mrb, "\""));
+	       mg_name = mrb_str_plus(mrb, mg_name, a[i]);
+	       mg_name = mrb_str_plus(mrb, mg_name, mrb_str_new_cstr(mrb, "\""));
+	       break;
+	  case MRB_TT_SYMBOL:
+//	       mg_name = mrb_str_plus(mrb, mg_name, mrb_sym2str(mrb, mrb_symbol(a[i])));
+//	       break;
+	  default:
+	       mg_name = mrb_str_plus(mrb, mg_name, mrb_obj_as_string(mrb, a[i]));
+	       break;
+	  }
      }
      command_str = strdup(RSTRING_PTR(mg_name));
      fprintf(stderr, "[%s]\n", command_str);
@@ -137,6 +149,12 @@ mrb_mg_eval_last_exp(int f, int n)
 {
     mrb_value ret;
     ret = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
+    if (mrb->exc) {
+	 mrb_value obj;
+	 obj = mrb_obj_value(mrb->exc);
+	 ewprintf("%s\n", RSTRING_PTR(mrb_any_to_s(mrb, obj)));
+	 return FALSE;
+    }
     ewprintf("%s", (RSTRING_PTR(ret)));
     return TRUE;
 }
@@ -212,8 +230,8 @@ mrb_mg_init()
     mrb_define_module_function(mrb, mg, "debug_log", 
 			       mrb_mg_debug_log, ARGS_REQ(1));
 
-    mrb_define_module_function(mrb, mg, "extend",
-                               mrb_mg_extend, ARGS_REQ(1));
+//    mrb_define_module_function(mrb, mg, "extend",
+//                               mrb_mg_extend, ARGS_REQ(1));
 
     mrb_define_module_function(mrb, mg, "method_missing",
 			       mrb_mg_method_missing, ARGS_ANY());
