@@ -110,70 +110,80 @@ int mrb_mode_num = 0;
 
 struct mrb_mode *mrb_modes;
 
-int mrb_mode1(int f, int n)
+int
+mrb_mode1(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode1));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode2(int f, int n)
+int
+mrb_mode2(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode2));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode3(int f, int n)
+int
+mrb_mode3(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode3));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode4(int f, int n)
+int
+mrb_mode4(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode4));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode5(int f, int n)
+int
+mrb_mode5(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode5));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode6(int f, int n)
+int
+mrb_mode6(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode6));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode7(int f, int n)
+int
+mrb_mode7(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode7));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode8(int f, int n)
+int
+mrb_mode8(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode8));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode9(int f, int n)
+int
+mrb_mode9(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode9));
      return changemode(f, n, strtok(mode_name, "-"));
 }
 
-int mrb_mode10(int f, int n)
+int
+mrb_mode10(int f, int n)
 {
      char *mode_name;
      mode_name = strdup(function_name(mrb_mode10));
@@ -183,14 +193,15 @@ int mrb_mode10(int f, int n)
 static void
 mrb_mode_handle_free(mrb_state *mrb, void *p)
 {
-     
+     mrb_free(mrb, p);
 }
 
 static const struct mrb_data_type mrb_mode_data_type = {
      "mrb_mode", mrb_mode_handle_free,
 };
 
-static int mrb_mode_callback(int f, int n)
+static int 
+mrb_mode_callback(int f, int n)
 {
      struct maps_s *cur_map;
      struct mrb_mode *cur_mode;
@@ -228,45 +239,48 @@ static int mrb_mode_callback(int f, int n)
      return rescan(f, n);
 }
 
-mrb_value mrb_mode_define_key(mrb_state *mrb, mrb_value self)
+mrb_value
+mrb_mode_define_key(mrb_state *mrb, mrb_value self)
 {
      mrb_value map_h;
-     mrb_value value;
      struct mrb_mode *mode;
-
      mrb_get_args(mrb, "H", &map_h);
-     value = mrb_iv_get(mrb, self, mrb_intern(mrb, "data"));
-     Data_Get_Struct(mrb, value, &mrb_mode_data_type, mode);
+     mode = (struct mrb_mode *)mrb_data_get_ptr(mrb, self, &mrb_mode_data_type);
      mode->callback_h = map_h;
 
      return self;
 }
 
-mrb_value mrb_mode_initialize(mrb_state *mrb, mrb_value self)
+mrb_value
+mrb_mode_initialize(mrb_state *mrb, mrb_value self)
 {
      mrb_value mode_name;
      struct mrb_mode *mode_data;
 
-     mode_data = malloc(sizeof(struct mrb_mode));
+     mode_data = (struct mrb_mode*)DATA_PTR(self);
+     if (mode_data) {
+	  mrb_mode_handle_free(mrb, mode_data);
+     }
+     DATA_TYPE(self) = &mrb_mode_data_type;
+     DATA_PTR(self) = NULL;
 
      mrb_get_args(mrb, "S", &mode_name);
      // TODO: duplicate check !!
 
+     mode_data = (struct mrb_mode *)mrb_malloc(mrb, sizeof(*mode_data));
      mode_data->mrb = mrb;
      mode_data->mode_obj = self;
-     mode_data->mode_name = RSTRING_PTR(mode_name);
+     mode_data->mode_name = strdup(RSTRING_PTR(mode_name));
      mode_data->next = NULL;
 
-     mrb_iv_set(mrb, self, mrb_intern(mrb, "data"), mrb_obj_value(
-		     Data_Wrap_Struct(mrb, (struct RClass*) &self,
-				      &mrb_mode_data_type, (void*)mode_data)));
+     DATA_PTR(self) = mode_data;
      return self;
 }
 
 mrb_value
 mrb_add_mode(mrb_state *mrb, mrb_value self)
 {
-     mrb_value mode_obj, mode_value;
+     mrb_value mode_obj;
      struct mrb_mode *mode;
      char *mode_name_str;
 
@@ -275,9 +289,8 @@ mrb_add_mode(mrb_state *mrb, mrb_value self)
      }
 
      mrb_get_args(mrb, "o", &mode_obj);
-
-     mode_value = mrb_iv_get(mrb, mode_obj, mrb_intern(mrb, "data"));
-     Data_Get_Struct(mrb, mode_value, &mrb_mode_data_type, mode);
+     mode = (struct mrb_mode *)mrb_data_get_ptr(mrb, mode_obj,
+						&mrb_mode_data_type);
      
      mode->next = mrb_modes;
      mrb_modes = mode;
@@ -297,15 +310,14 @@ void mrb_mode_init(mrb_state *mrb)
      struct RClass *mode, *mg;
 
      maps = NULL;
-//     kernel = mrb_class_get(mrb, "Kernel");
      mg = mrb_class_get(mrb, "MG");
-
      
      mode = mrb_define_class_under(mrb, mg, "Mode", mrb->object_class);
+     MRB_SET_INSTANCE_TT(mode, MRB_TT_DATA);
      mrb_define_method(mrb, mode, "initialize", mrb_mode_initialize, 
 		       ARGS_REQ(1));
      mrb_define_method(mrb, mode, "define_key", mrb_mode_define_key, 
-		       ARGS_ANY());
+		       ARGS_REQ(1));
 
      mrb_define_module_function(mrb, mg, "add_mode",
 				mrb_add_mode, ARGS_REQ(1));

@@ -50,34 +50,40 @@ mrb_mg_extend(mrb_state *mrb, mrb_value self)
 mrb_value
 mrb_mg_method_missing(mrb_state *mrb, mrb_value self)
 {
-     mrb_value name, *a, mg_name;
+     mrb_value name, *a;
      int alen, i;
-
-     char *command_str;
+     char *command_str, *tmp;
      mrb_get_args(mrb, "o*", &name, &a, &alen);
      
-     mg_name = mrb_sym2str(mrb, mrb_symbol(name));
-     mg_name = mrb_funcall(mrb, mg_name, "gsub", 2, 
-			   mrb_str_new_cstr(mrb, "_"), 
-			   mrb_str_new_cstr(mrb, "-"));
+     command_str = strdup(RSTRING_PTR(mrb_sym2str(mrb, mrb_symbol(name))));
+     tmp = command_str;
+     while (*tmp) {
+	  if (*tmp == '_') 
+	       *tmp = '-';
+	  tmp++;
+     }
      for (i = 0; i < alen; i++) {
-	  mg_name = mrb_str_plus(mrb, mg_name, mrb_str_new_cstr(mrb, " "));
 	  switch (mrb_type(a[i])) {
 	  case MRB_TT_STRING:
-	       mg_name = mrb_str_plus(mrb, mg_name, mrb_str_new_cstr(mrb, "\""));
-	       mg_name = mrb_str_plus(mrb, mg_name, a[i]);
-	       mg_name = mrb_str_plus(mrb, mg_name, mrb_str_new_cstr(mrb, "\""));
+	       command_str = realloc(command_str, 
+				     strlen(command_str) +
+				     RSTRING_LEN(a[i]) + 4);
+	       strcat(command_str, " \"");
+	       strcat(command_str, RSTRING_PTR(a[i]));
+	       strcat(command_str, "\"");
 	       break;
 	  case MRB_TT_SYMBOL:
 //	       mg_name = mrb_str_plus(mrb, mg_name, mrb_sym2str(mrb, mrb_symbol(a[i])));
 //	       break;
 	  default:
-	       mg_name = mrb_str_plus(mrb, mg_name, mrb_obj_as_string(mrb, a[i]));
+	       command_str = realloc(command_str,
+				     strlen(command_str) +
+				     RSTRING_LEN(mrb_obj_as_string(mrb, a[i])) + 2);
+	       command_str = strcat(command_str, " ");
+	       command_str = strcat(command_str, RSTRING_PTR(mrb_obj_as_string(mrb, a[i])));
 	       break;
 	  }
      }
-     command_str = strdup(RSTRING_PTR(mg_name));
-     fprintf(stderr, "[%s]\n", command_str);
      return mrb_fixnum_value(excline(command_str));
      
 }
@@ -86,6 +92,28 @@ mrb_value
 mrb_mg_buffer_string(mrb_state *mrb, mrb_value self)
 {
      return mrb_str_new(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
+}
+
+mrb_value
+mrb_mg_current_position(mrb_state *mrb, mrb_value self)
+{
+     struct line *clp;
+     int nline;
+
+     mrb_value cursor_a;
+     cursor_a = mrb_ary_new(mrb);
+
+     nline = 0;
+     for (;;) {
+	  ++nline;
+	  if (clp == curwp->w_dotp) {
+	       if (clp == curbp->b_headp)
+		    break;
+	  }
+     }
+     mrb_ary_push(mrb, cursor_a, mrb_fixnum_value(nline));
+     mrb_ary_push(mrb, cursor_a, mrb_fixnum_value(getcolpos()));
+     return cursor_a;
 }
 
 mrb_value
@@ -238,6 +266,10 @@ mrb_mg_init()
     /* buffer_string */
     mrb_define_module_function(mrb, mg, "buffer_string",
 			       mrb_mg_buffer_string, ARGS_NONE());
+
+    /* current_position */
+    mrb_define_module_function(mrb, mg, "current_position",
+			       mrb_mg_current_position, ARGS_NONE());
 
     /* match.c */
     mrb_define_module_function(mrb, mg, "showmatch",

@@ -13,6 +13,7 @@
 
 #include "mruby.h"
 #include "mruby/string.h"
+#include "mruby/variable.h"
 
 #include "mrb_autoexec.h"
 
@@ -37,7 +38,7 @@ PF mrb_autoexec_funcs[] = {
      mrb_autoexec9,
 };
 
-struct mrb_autoexec mrb_autos[MRB_AUTOEXEC_MAX];;
+struct mrb_autoexec mrb_auto[MRB_AUTOEXEC_MAX];;
 int mrb_autoexec_num = 0;
 
 static int
@@ -45,10 +46,11 @@ mrb_autoexec(int f, int n, int i)
 {
      mrb_state *mrb;
 
-     mrb = mrb_autos[i].mrb;
+     mrb = mrb_auto[i].mrb;
      mrb_yield(mrb, 
-	       mrb_autos[i].callback,
-	       mrb_str_new_cstr(mrb, mrb_autos[i].pattern));
+	       mrb_auto[i].callback,
+	       mrb_str_new(mrb, mrb_auto[i].pattern,
+			   strlen(mrb_auto[i].pattern)));
      return TRUE;
 }
 
@@ -140,9 +142,10 @@ mrb_auto_execute(mrb_state *mrb, mrb_value self)
 
      mrb_get_args(mrb, "&S", &block, &pat);
 
-     mrb_autos[mrb_autoexec_num].mrb = mrb;
-     mrb_autos[mrb_autoexec_num].pattern = RSTRING_PTR(pat);
-     mrb_autos[mrb_autoexec_num].callback = block;
+     mrb_auto[mrb_autoexec_num].mrb = mrb;
+     mrb_auto[mrb_autoexec_num].pattern = strdup(RSTRING_PTR(pat));
+
+     mrb_auto[mrb_autoexec_num].callback = block;
 
      sprintf(autoexec_name_str, "mrb_autoexec%d", mrb_autoexec_num);
 
