@@ -13,6 +13,10 @@
 
 #include <err.h>
 
+#ifdef UTF8
+#include "utf8.h"
+#endif /* UTF8 */
+
 #ifdef MRUBY
 #include "mrb_mg.h"
 #endif /* MRUBY */

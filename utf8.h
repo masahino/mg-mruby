@@ -3,6 +3,7 @@
 
 #define llength_utf8(lp) (utf8_nlength((lp)->l_text, (lp)->l_used))
 
+void utf8_init(void);
 int utf8_bytes(char *line, int index, int counts);
 int utf8_length(char *line);
 int utf8_nlength(char *line, int size);

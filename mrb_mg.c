@@ -152,9 +152,8 @@ mrb_mg_load(char *fname)
               if (!mrb_undef_p(v)) {
 		       mrb_value obj;
 		       obj = mrb_obj_value(mrb->exc);
-//		       obj2 = mrb_funcall(mrb, obj, "inspect", 0);
-		printf("%s\n", RSTRING_PTR(mrb_any_to_s(mrb, obj)));
-                  return FALSE;
+                       ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
+                       return FALSE;
 	      }
 	  }
 	  return TRUE;
@@ -180,7 +179,7 @@ mrb_mg_eval_last_exp(int f, int n)
     if (mrb->exc) {
 	 mrb_value obj;
 	 obj = mrb_obj_value(mrb->exc);
-	 ewprintf("%s\n", RSTRING_PTR(mrb_any_to_s(mrb, obj)));
+	 ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
 	 return FALSE;
     }
     ewprintf("%s", (RSTRING_PTR(ret)));
@@ -196,6 +195,13 @@ mrb_mg_eval_print_last_exp(int f, int n)
     s = newline(FFRAND, 1);
     if (s != TRUE) {
         return FALSE;
+    }
+    if (mrb->exc) {
+	 mrb_value obj;
+	 obj = mrb_obj_value(mrb->exc);
+	 obj = mrb_funcall(mrb, obj, "inspect", 0);
+	 linsert_str(RSTRING_PTR(obj), RSTRING_LEN(obj));
+	 return FALSE;
     }
     s = linsert_str(RSTRING_PTR(eval_result), RSTRING_LEN(eval_result));
     newline(FFRAND, 1);
@@ -216,9 +222,84 @@ mrb_mg_evalbuffer(int f, int n)
 	  buf_str = mrb_str_cat2(mrb, buf_str, "\n");
      }
      ret = mrb_load_string(mrb, RSTRING_PTR(buf_str));
+     if (mrb->exc) {
+	  mrb_value obj;
+	  obj = mrb_obj_value(mrb->exc);
+	  ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
+	  return FALSE;
+     }
      return TRUE;
 }
 
+int
+mrb_mg_eval_region(int f, int n)
+{
+     struct region reg;
+     struct line *flp, *blp;
+     long fsize, bsize;
+     char *text;
+     mrb_value ret;
+     
+     if (curwp->w_markp == NULL) {
+	  ewprintf("No mark set int this window");
+	  return FALSE;
+     }
+
+     /* "r_size" always ok */
+     if (curwp->w_dotp == curwp->w_markp) {
+	  reg.r_linep = curwp->w_dotp;
+	  reg.r_lineno = curwp->w_dotline;
+	  if (curwp->w_doto < curwp->w_marko) {
+	       reg.r_offset = curwp->w_doto;
+	       reg.r_size = (RSIZE)(curwp->w_marko - curwp->w_doto);
+	  } else {
+	       reg.r_offset = curwp->w_marko;
+	       reg.r_size = (RSIZE)(curwp->w_doto - curwp->w_marko);
+	  }
+     } else {
+	  /* get region size */
+	  flp = blp = curwp->w_dotp;
+	  bsize = curwp->w_doto;
+	  fsize = llength(flp) - curwp->w_doto + 1;
+	  while (lforw(flp) != curbp->b_headp || lback(blp) != curbp->b_headp) {
+	       if (lforw(flp) != curbp->b_headp) {
+		    flp = lforw(flp);
+		    if (flp == curwp->w_markp) {
+			 reg.r_linep = curwp->w_dotp;
+			 reg.r_offset = curwp-> w_doto;
+			 reg.r_lineno = curwp->w_dotline;
+			 reg.r_size = fsize + curwp->w_marko;
+			 break;
+		    }
+		    fsize += llength(flp) + 1;
+	       }
+	       if (lback(blp) != curbp->b_headp) {
+		    blp = lback(blp);
+		    bsize += llength(blp) + 1;
+		    if (blp == curwp->w_markp) {
+			 reg.r_linep = blp;
+			 reg.r_offset = curwp->w_marko;
+			 reg.r_lineno = curwp->w_markline;
+			 reg.r_size = bsize - curwp->w_marko;
+			 break;
+		    }
+	       }
+	  }
+     }
+     if ((text = malloc(reg.r_size + 1)) == NULL)
+	  return ABORT;
+     region_get_data(&reg, text, reg.r_size);
+	  
+     ret = mrb_load_string(mrb, text);
+     if (mrb->exc) {
+	  mrb_value obj;
+	  obj = mrb_obj_value(mrb->exc);
+	  ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
+	  return FALSE;
+     }
+     return TRUE;
+	       
+}
 
 /* match.c */
 mrb_value
@@ -290,6 +371,7 @@ mrb_mg_init()
 
     funmap_add(mrb_mg_eval_last_exp, "eval-last-exp");
     funmap_add(mrb_mg_eval_print_last_exp, "eval-print-last-exp");
+    funmap_add(mrb_mg_eval_region, "eval-region");
 }
 
 //#endif
