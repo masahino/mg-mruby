@@ -297,6 +297,7 @@ mrb_add_mode(mrb_state *mrb, mrb_value self)
 
      maps_add((KEYMAP *)&mrb_map, mode->mode_name);
      mode_name_str = strdup(mode->mode_name);
+     mode_name_str = realloc(mode_name_str, strlen(mode_name_str)+6);
      strcat(mode_name_str, "-mode");
      funmap_add(mrb_mode_funcs[mrb_mode_num], mode_name_str);
      mrb_mode_num++;
