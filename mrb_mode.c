@@ -206,18 +206,23 @@ mrb_mode_callback(int f, int n)
      struct maps_s *cur_map;
      struct mrb_mode *cur_mode;
      mrb_value key_hash, keys;
-     int i;
+     mrb_value mode_list, mode_tmp;
+     int i, ai;
      char *tmp_s;
 
-     cur_mode = mrb_modes;
+     mode_list = mrb_gv_get(mrb, mrb_intern(mrb, "$mg_mode_list"));
+
      cur_map = curbp->b_modes[curbp->b_nmodes];
-     while (cur_mode != NULL) {
-	  if (strcmp(cur_mode->mode_name, cur_map->p_name) == 0) {
-	       break;
-	  }
-	  cur_mode = cur_mode->next;
+     ai = mrb_gc_arena_save(mrb);
+     mode_tmp = mrb_hash_get(mrb, mode_list,
+			     mrb_str_new_cstr(mrb, cur_map->p_name));
+
+     if (mrb_nil_p(mode_tmp)) {
+	  return rescan(f, n);
      }
-     if (cur_mode == NULL) {
+     Data_Get_Struct(mrb, mode_tmp, &mrb_mode_data_type, cur_mode);
+     if (mrb_nil_p(cur_mode->callback_h)) {
+	  mrb_gc_arena_restore(mrb, ai);
 	  return rescan(f, n);
      }
      key_hash = cur_mode->callback_h;
@@ -225,6 +230,7 @@ mrb_mode_callback(int f, int n)
      for (i = 0; i < RARRAY_LEN(keys); i++) {
 	  tmp_s = mrb_string_value_ptr(mrb, mrb_ary_entry(keys, i));
 	  if (*tmp_s == key.k_chars[key.k_count -1]) {
+	       mrb->exc = 0;
 	       mrb_funcall(mrb, mrb_top_self(mrb),
 			   "__send__", 4,
 			   mrb_hash_get(mrb, key_hash, mrb_ary_entry(keys, i)), 
@@ -232,10 +238,18 @@ mrb_mode_callback(int f, int n)
 			   mrb_fixnum_value(n),
 			   mrb_ary_entry(keys, i)
 		    );
+	       if (mrb->exc) {
+		    mrb_value obj;
+		    obj = mrb_obj_value(mrb->exc);
+		    ewprintf("%s", 
+			     RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
+	       }
+	       mrb_gc_arena_restore(mrb, ai);
 	       return TRUE;
 
 	  }
      }
+     mrb_gc_arena_restore(mrb, ai);
      return rescan(f, n);
 }
 
@@ -247,7 +261,7 @@ mrb_mode_define_key(mrb_state *mrb, mrb_value self)
      mrb_get_args(mrb, "H", &map_h);
      mode = (struct mrb_mode *)mrb_data_get_ptr(mrb, self, &mrb_mode_data_type);
      mode->callback_h = map_h;
-
+     DATA_PTR(self) = mode;
      return self;
 }
 
@@ -271,6 +285,7 @@ mrb_mode_initialize(mrb_state *mrb, mrb_value self)
      mode_data->mrb = mrb;
      mode_data->mode_obj = self;
      mode_data->mode_name = strdup(RSTRING_PTR(mode_name));
+     mode_data->callback_h = mrb_nil_value();
      mode_data->next = NULL;
 
      DATA_PTR(self) = mode_data;
@@ -283,6 +298,7 @@ mrb_add_mode(mrb_state *mrb, mrb_value self)
      mrb_value mode_obj;
      struct mrb_mode *mode;
      char *mode_name_str;
+     mrb_value mode_list;
 
      if (mrb_mode_num >= MRB_MODE_MAX) {
 	  return mrb_nil_value();
@@ -301,7 +317,11 @@ mrb_add_mode(mrb_state *mrb, mrb_value self)
      strcat(mode_name_str, "-mode");
      funmap_add(mrb_mode_funcs[mrb_mode_num], mode_name_str);
      mrb_mode_num++;
-
+     
+     mode_list = mrb_gv_get(mrb, mrb_intern(mrb, "$mg_mode_list"));
+     mrb_hash_set(mrb, mode_list, mrb_str_new_cstr(mrb, mode->mode_name),
+		  mrb_obj_value(Data_Wrap_Struct(mrb, mrb->object_class, 
+						 &mrb_mode_data_type, mode)));
      return self;
 }
 
@@ -309,6 +329,7 @@ mrb_add_mode(mrb_state *mrb, mrb_value self)
 void mrb_mode_init(mrb_state *mrb)
 {
      struct RClass *mode, *mg;
+     mrb_value mode_list;
 
      maps = NULL;
      mg = mrb_class_get(mrb, "MG");
@@ -322,5 +343,7 @@ void mrb_mode_init(mrb_state *mrb)
 
      mrb_define_module_function(mrb, mg, "add_mode",
 				mrb_add_mode, ARGS_REQ(1));
-
+     mode_list = mrb_hash_new(mrb);
+     mrb_gv_set(mrb, mrb_intern(mrb, "$mg_mode_list"), mode_list);
+     
 }

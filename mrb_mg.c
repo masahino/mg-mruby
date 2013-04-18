@@ -80,7 +80,8 @@ mrb_mg_method_missing(mrb_state *mrb, mrb_value self)
 				     strlen(command_str) +
 				     RSTRING_LEN(mrb_obj_as_string(mrb, a[i])) + 2);
 	       command_str = strcat(command_str, " ");
-	       command_str = strcat(command_str, RSTRING_PTR(mrb_obj_as_string(mrb, a[i])));
+	       command_str = strcat(command_str,
+				    RSTRING_PTR(mrb_obj_as_string(mrb, a[i])));
 	       break;
 	  }
      }
@@ -150,10 +151,11 @@ mrb_mg_load(char *fname)
 	  fclose(f);
 	  if (mrb->exc) {
               if (!mrb_undef_p(v)) {
-		       mrb_value obj;
-		       obj = mrb_obj_value(mrb->exc);
-                       ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
-                       return FALSE;
+		   mrb_value obj;
+		   obj = mrb_obj_value(mrb->exc);
+		   ewprintf("%s", 
+			    RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
+		   return FALSE;
 	      }
 	  }
 	  return TRUE;
@@ -164,48 +166,50 @@ mrb_mg_load(char *fname)
 static mrb_value
 mrb_mg_eval_string(mrb_state *mrb, const char *str, int len)
 {
-    mrb_value ret, ret_str;
+     mrb_value ret;
     mrb->exc = 0;
-    ret = mrb_load_nstring(mrb, str, len);
-    ret_str = mrb_funcall(mrb, ret, "to_s", 0);
-    return ret_str;
+    return mrb_load_nstring(mrb, str, len);
 }
 
 int
 mrb_mg_eval_last_exp(int f, int n)
 {
-    mrb_value ret;
-    ret = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
-    if (mrb->exc) {
-	 mrb_value obj;
-	 obj = mrb_obj_value(mrb->exc);
-	 ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
-	 return FALSE;
-    }
-    ewprintf("%s", (RSTRING_PTR(ret)));
-    return TRUE;
+     mrb_value ret;
+     ret = mrb_mg_eval_string(mrb,
+			      ltext(curwp->w_dotp), llength(curwp->w_dotp));
+     if (mrb->exc) {
+	  mrb_value obj;
+	  obj = mrb_obj_value(mrb->exc);
+	  ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
+	  return TRUE;
+     }
+     ewprintf("%s", (RSTRING_PTR(mrb_funcall(mrb, ret, "to_s", 0))));
+     return TRUE;
 }
 
 int 
 mrb_mg_eval_print_last_exp(int f, int n)
 {
-    mrb_value eval_result;
-    int s;
-    eval_result = mrb_mg_eval_string(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
-    s = newline(FFRAND, 1);
-    if (s != TRUE) {
-        return FALSE;
-    }
-    if (mrb->exc) {
-	 mrb_value obj;
-	 obj = mrb_obj_value(mrb->exc);
-	 obj = mrb_funcall(mrb, obj, "inspect", 0);
-	 linsert_str(RSTRING_PTR(obj), RSTRING_LEN(obj));
-	 return FALSE;
-    }
-    s = linsert_str(RSTRING_PTR(eval_result), RSTRING_LEN(eval_result));
-    newline(FFRAND, 1);
-    return TRUE;
+     mrb_value ret, ret_str;
+     int s;
+     ret = mrb_mg_eval_string(mrb,
+			      ltext(curwp->w_dotp), llength(curwp->w_dotp));
+     s = newline(FFRAND, 1);
+     if (s != TRUE) {
+	  return FALSE;
+     }
+     if (mrb->exc) {
+	  mrb_value obj;
+	  obj = mrb_obj_value(mrb->exc);
+	  ret_str = mrb_funcall(mrb, obj, "inspect", 0);
+	  return FALSE;
+     } else {
+	  ret_str = mrb_funcall(mrb, ret, "to_s", 0);
+     }
+
+     s = linsert_str(RSTRING_PTR(ret_str), RSTRING_LEN(ret_str));
+     newline(FFRAND, 1);
+     return TRUE;
 }
 
 int
