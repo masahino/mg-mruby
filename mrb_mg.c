@@ -174,16 +174,21 @@ mrb_mg_eval_string(mrb_state *mrb, const char *str, int len)
 int
 mrb_mg_eval_last_exp(int f, int n)
 {
-     mrb_value ret;
+     mrb_value ret, ret_str;
+     int ai;
+     ai = mrb_gc_arena_save(mrb);
      ret = mrb_mg_eval_string(mrb,
 			      ltext(curwp->w_dotp), llength(curwp->w_dotp));
+     if (!mrb->exc) {
+	  ret_str = mrb_funcall(mrb, ret, "to_s", 0);
+     }
      if (mrb->exc) {
 	  mrb_value obj;
 	  obj = mrb_obj_value(mrb->exc);
-	  ewprintf("%s", RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
-	  return TRUE;
+	  ret_str = mrb_funcall(mrb, obj, "inspect", 0);
      }
-     ewprintf("%s", (RSTRING_PTR(mrb_funcall(mrb, ret, "to_s", 0))));
+     ewprintf("%s", (RSTRING_PTR(ret_str)));
+     mrb_gc_arena_restore(mrb, ai);
      return TRUE;
 }
 
@@ -191,24 +196,26 @@ int
 mrb_mg_eval_print_last_exp(int f, int n)
 {
      mrb_value ret, ret_str;
-     int s;
+     int s, ai;
+     ai = mrb_gc_arena_save(mrb);
      ret = mrb_mg_eval_string(mrb,
 			      ltext(curwp->w_dotp), llength(curwp->w_dotp));
      s = newline(FFRAND, 1);
      if (s != TRUE) {
+	  mrb_gc_arena_restore(mrb, ai);
 	  return FALSE;
+     }
+     if (!mrb->exc) {
+	  ret_str = mrb_funcall(mrb, ret, "to_s", 0);
      }
      if (mrb->exc) {
 	  mrb_value obj;
 	  obj = mrb_obj_value(mrb->exc);
 	  ret_str = mrb_funcall(mrb, obj, "inspect", 0);
-	  return FALSE;
-     } else {
-	  ret_str = mrb_funcall(mrb, ret, "to_s", 0);
-     }
-
+     } 
      s = linsert_str(RSTRING_PTR(ret_str), RSTRING_LEN(ret_str));
      newline(FFRAND, 1);
+     mrb_gc_arena_restore(mrb, ai);
      return TRUE;
 }
 
@@ -225,7 +232,7 @@ mrb_mg_evalbuffer(int f, int n)
 	  buf_str = mrb_str_cat(mrb, buf_str, ltext(lp), llength(lp));
 	  buf_str = mrb_str_cat2(mrb, buf_str, "\n");
      }
-     ret = mrb_load_string(mrb, RSTRING_PTR(buf_str));
+     ret = mrb_load_nstring(mrb, RSTRING_PTR(buf_str), RSTRING_LEN(buf_str));
      if (mrb->exc) {
 	  mrb_value obj;
 	  obj = mrb_obj_value(mrb->exc);
