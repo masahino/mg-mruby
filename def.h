@@ -14,6 +14,11 @@
 #include	"ttydef.h"
 #include	"chrdef.h"
 
+#ifdef MRUBY
+#include <mruby.h>
+#include <mruby/compile.h>
+#endif /* MRUBY */
+
 #ifndef __dead
 #define __dead
 #endif 
@@ -270,6 +275,9 @@ struct buffer {
 #ifdef UTF8
 	char             b_encoding[NLINE]; /* file encoding */
 #endif /* UTF8 */
+#ifdef MRUBY
+        mrbc_context     *b_mrb_cxt;    
+#endif /* MRUBY */
 };
 #define b_bufp	b_list.l_p.x_bp
 #define b_bname b_list.l_name

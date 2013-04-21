@@ -12,6 +12,11 @@
 #include <libgen.h>
 #include <stdarg.h>
 
+#ifdef MRUBY
+#include <mruby.h>
+#include <mruby/compile.h>
+#endif /* MRUBY */
+
 static struct buffer  *makelist(void);
 static struct buffer *bnew(const char *);
 
@@ -19,6 +24,9 @@ static int usebufname(const char *);
 
 /* Flag for global working dir */
 extern int globalwd;
+#ifdef MRUBY
+extern mrb_state *mrb;
+#endif /* MRUBY */
 
 /* ARGSUSED */
 int
@@ -558,6 +566,9 @@ bnew(const char *bname)
 		ewprintf("Can't get %d bytes", strlen(bname) + 1);
 		return (NULL);
 	}
+#ifdef MRUBY
+	bp->b_mrb_cxt = mrbc_context_new(mrb);
+#endif 
 
 	return (bp);
 }

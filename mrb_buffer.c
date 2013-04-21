@@ -18,7 +18,11 @@
 static void
 mrb_buffer_free(mrb_state *mrb, void *ptr)
 {
-     mrb_free(mrb, ptr);
+     struct buffer *bp;
+     bp = (struct buffer *)ptr;
+     if (bfind(bp->b_bname, FALSE) == NULL) {
+	  mrb_free(mrb, ptr);
+     }
 }
 
 static struct mrb_data_type mrb_buffer_type = { "Buffer", mrb_buffer_free };
@@ -30,7 +34,7 @@ mrb_buffer_get_name(mrb_state *mrb, mrb_value self)
      bp = (struct buffer *)mrb_data_get_ptr(mrb, self, &mrb_buffer_type);
      if (bp == NULL)
 	  return mrb_nil_value();
-     return mrb_str_new_cstr(mrb, bp->b_bname);
+     return mrb_str_new_cstr(mrb, strdup(bp->b_bname));
 }
 
 mrb_value

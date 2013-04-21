@@ -167,8 +167,11 @@ static mrb_value
 mrb_mg_eval_string(mrb_state *mrb, const char *str, int len)
 {
      mrb_value ret;
-    mrb->exc = 0;
-    return mrb_load_nstring(mrb, str, len);
+     mrbc_context* cxt;
+
+     cxt = curbp->b_mrb_cxt;
+     mrb->exc = 0;
+     return mrb_load_nstring_cxt(mrb, str, len, cxt);
 }
 
 int
