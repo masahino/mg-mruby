@@ -261,6 +261,7 @@ mrb_mode_define_key(mrb_state *mrb, mrb_value self)
      mrb_get_args(mrb, "H", &map_h);
      mode = (struct mrb_mode *)mrb_data_get_ptr(mrb, self, &mrb_mode_data_type);
      mode->callback_h = map_h;
+     mrb_iv_set(mrb, self, mrb_intern(mrb, "keymap"), map_h);
      DATA_PTR(self) = mode;
      return self;
 }

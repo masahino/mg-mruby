@@ -104,13 +104,16 @@ mrb_mg_current_position(mrb_state *mrb, mrb_value self)
      mrb_value cursor_a;
      cursor_a = mrb_ary_new(mrb);
 
+     clp = bfirstlp(curbp);
      nline = 0;
      for (;;) {
 	  ++nline;
 	  if (clp == curwp->w_dotp) {
-	       if (clp == curbp->b_headp)
-		    break;
+	       break;
 	  }
+	  clp = lforw(clp);
+	  if (clp == curbp->b_headp)
+	       break;
      }
      mrb_ary_push(mrb, cursor_a, mrb_fixnum_value(nline));
      mrb_ary_push(mrb, cursor_a, mrb_fixnum_value(getcolpos()));
