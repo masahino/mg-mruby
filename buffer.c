@@ -566,9 +566,12 @@ bnew(const char *bname)
 		ewprintf("Can't get %d bytes", strlen(bname) + 1);
 		return (NULL);
 	}
+#ifdef UTF8
+#endif /* UTF8 */
+	strcpy(bp->b_encoding, "UTF-8");
 #ifdef MRUBY
 	bp->b_mrb_cxt = mrbc_context_new(mrb);
-#endif 
+#endif /* MRUBY */
 
 	return (bp);
 }

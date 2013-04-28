@@ -51,6 +51,20 @@ mrb_buffer_get_current(mrb_state *mrb, mrb_value self)
 }
 
 mrb_value
+mrb_buffer_set_encoding(mrb_state *mrb, mrb_value self)
+{
+     struct buffer *bp;
+     char *encode_str;
+
+     bp = (struct buffer *)mrb_data_get_ptr(mrb, self, &mrb_buffer_type);
+     if (bp == NULL)
+	  return mrb_nil_value();
+     mrb_get_args(mrb, "z", encode_str);
+     strncpy(bp->b_encoding, encode_str, NLINE);
+     return mrb_true_value();
+}
+
+mrb_value
 mrb_buffer_initialize(mrb_state *mrb, mrb_value self)
 {
 	mrb_value mrb_buf_name;
@@ -86,4 +100,7 @@ mrb_buffer_init(mrb_state *mrb)
     mrb_define_method(mrb, buffer, "initialize", mrb_buffer_initialize, 
 		       ARGS_OPT(1));
     mrb_define_method(mrb, buffer, "name", mrb_buffer_get_name, ARGS_NONE());
+
+    mrb_define_method(mrb, buffer, "set_encoding", mrb_buffer_set_encoding,
+		      ARGS_REQ(1));
 }
