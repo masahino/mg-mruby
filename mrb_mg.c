@@ -226,6 +226,26 @@ mrb_mg_eval_print_last_exp(int f, int n)
 }
 
 int
+mrb_mg_evalexpr(char *line)
+{
+     mrb_value ret, ret_str;
+     int ai;
+     ai = mrb_gc_arena_save(mrb);
+     ret = mrb_mg_eval_string(mrb, line, strlen(line));
+     if (!mrb->exc) {
+	  ret_str = mrb_funcall(mrb, ret, "to_s", 0);
+     }
+     if (mrb->exc) {
+	  mrb_value obj;
+	  obj = mrb_obj_value(mrb->exc);
+	  ret_str = mrb_funcall(mrb, obj, "inspect", 0);
+     }
+     ewprintf("%s", (RSTRING_PTR(ret_str)));
+     mrb_gc_arena_restore(mrb, ai);
+     return TRUE;
+}
+
+int
 mrb_mg_evalbuffer(int f, int n)
 {
      struct line *lp;

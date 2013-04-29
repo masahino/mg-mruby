@@ -600,6 +600,9 @@ evalexpr(int f, int n)
 		return (ABORT);
 	else if (bufp[0] == '\0')
 		return (FALSE);
+#ifdef MRUBY
+	return mrb_mg_evalexpr(exbuf);
+#endif 
 	return (excline(exbuf));
 }
 
