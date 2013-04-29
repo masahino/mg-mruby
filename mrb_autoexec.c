@@ -12,6 +12,7 @@
 #include "key.h"
 
 #include "mruby.h"
+#include "mruby/hash.h"
 #include "mruby/string.h"
 #include "mruby/variable.h"
 
@@ -133,6 +134,7 @@ mrb_value
 mrb_auto_execute(mrb_state *mrb, mrb_value self)
 {
      mrb_value pat, block;
+     mrb_value autoexec_list;
      int s;
      char autoexec_name_str[32];
 
@@ -157,6 +159,10 @@ mrb_auto_execute(mrb_state *mrb, mrb_value self)
      if ((s = add_autoexec(RSTRING_PTR(pat), 
 			   autoexec_name_str)) != TRUE)
 	 return mrb_fixnum_value(s);
+
+     autoexec_list = mrb_gv_get(mrb, mrb_intern(mrb, "$mg_autoexec_list"));
+     mrb_hash_set(mrb, autoexec_list, pat, block);
+		  
      return mrb_true_value();
 }
 
@@ -164,10 +170,13 @@ void
 mrb_autoexec_init(mrb_state *mrb)
 {
     struct RClass *mg;
+    mrb_value autoexec_list;
 
     mg = mrb_class_get(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "auto_execute",
 			       mrb_auto_execute, ARGS_REQ(2));
 
+    autoexec_list = mrb_hash_new(mrb);
+    mrb_gv_set(mrb, mrb_intern(mrb, "$mg_autoexec_list"), autoexec_list);
 }
