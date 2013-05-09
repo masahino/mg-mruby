@@ -268,7 +268,8 @@ extraobjs="$extraobjs utf8.o"
 # MRUBY
 add_inc MRUBY
 extraflags="$extraflags -I./mruby/include"
-extraobjs="$extraobjs mrb_mg.o mrb_mode.o mrb_extend.o mrb_autoexec.o mrb_buffer.o mruby/build/host/lib/libmruby.a"
+extraobjs="$extraobjs mrb_mg.o mrb_mode.o mrb_extend.o mrb_autoexec.o mrb_buffer.o mrb_keymap.o"
+extraobjs="$extraobjs mruby/build/host/lib/libmruby.a"
 
 rm testfile*
 

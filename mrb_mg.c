@@ -24,6 +24,7 @@
 #include "mrb_extend.h"
 #include "mrb_autoexec.h"
 #include "mrb_buffer.h"
+#include "mrb_keymap.h"
 
 mrb_state *mrb;
 
@@ -231,6 +232,7 @@ mrb_mg_evalexpr(char *line)
      mrb_value ret, ret_str;
      int ai;
      ai = mrb_gc_arena_save(mrb);
+	fprintf(stderr, "line = %s\n", line);
      ret = mrb_mg_eval_string(mrb, line, strlen(line));
      if (!mrb->exc) {
 	  ret_str = mrb_funcall(mrb, ret, "to_s", 0);
@@ -258,6 +260,7 @@ mrb_mg_evalbuffer(int f, int n)
 	  buf_str = mrb_str_cat(mrb, buf_str, ltext(lp), llength(lp));
 	  buf_str = mrb_str_cat2(mrb, buf_str, "\n");
      }
+     mrb->exc = 0;
      ret = mrb_load_nstring(mrb, RSTRING_PTR(buf_str), RSTRING_LEN(buf_str));
      if (mrb->exc) {
 	  mrb_value obj;
@@ -405,6 +408,7 @@ mrb_mg_init()
     mrb_extend_init(mrb);
     mrb_autoexec_init(mrb);
     mrb_buffer_init(mrb);
+    mrb_keymap_init(mrb);
 
     funmap_add(mrb_mg_eval_last_exp, "eval-last-exp");
     funmap_add(mrb_mg_eval_print_last_exp, "eval-print-last-exp");

@@ -20,20 +20,6 @@ extern int makebkfile(int, int);
 extern int setfillcol(int, int);
 
 
-/*
-     global-set-key
-            Bind a key in the global (fundamental) key map.
-*/
-mrb_value
-mrb_mg_global_set_key(mrb_state *mrb, mrb_value self)
-{
-     mrb_value key, func;
-     int ret;
-
-     mrb_get_args(mrb, "SS", &key, &func);
-     ret = dobindkey(fundamental_map, RSTRING_PTR(func), RSTRING_PTR(key));
-     return mrb_fixnum_value(ret);
-}
 
 /* 
     insert
@@ -52,20 +38,6 @@ mrb_mg_insert(mrb_state *mrb, mrb_value self)
      return mrb_fixnum_value(ret);
 }
 
-/*
-     local-set-key
-            Bind a key mapping in the local (topmost) mode.
-*/
-mrb_value
-mrb_mg_local_set_key(mrb_state *mrb, mrb_value self)
-{
-     mrb_value key, func;
-     int ret;
-
-     mrb_get_args(mrb, "SS", &key, &func);
-     ret = dobindkey(curbp->b_modes[curbp->b_nmodes]->p_map, RSTRING_PTR(func), RSTRING_PTR(key));
-     return mrb_fixnum_value(ret);
-}
 
 /*
      next-line
@@ -94,12 +66,8 @@ mrb_extend_init(mrb_state *mrb)
 
     mg = mrb_class_get(mrb, "MG");
 
-    mrb_define_module_function(mrb, mg, "global_set_key",
-			       mrb_mg_global_set_key, ARGS_REQ(2));
     mrb_define_module_function(mrb, mg, "insert",
 			       mrb_mg_insert, ARGS_REQ(1));
-    mrb_define_module_function(mrb, mg, "local_set_key",
-			       mrb_mg_local_set_key, ARGS_REQ(2));
     mrb_define_module_function(mrb, mg, "next_line",
 			       mrb_mg_next_line, ARGS_OPT(1));
 }
