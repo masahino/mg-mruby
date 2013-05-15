@@ -19,8 +19,6 @@ extern int indentmode(int, int);
 extern int makebkfile(int, int);
 extern int setfillcol(int, int);
 
-
-
 /* 
     insert
             Insert a string, mainly for use from macros.

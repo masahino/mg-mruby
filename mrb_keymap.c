@@ -63,7 +63,6 @@ mrb_mg_global_set_key(mrb_state *mrb, mrb_value self)
 
      return mrb_mg_set_key(mrb, self, fundamental_map);
 
-//     mrb_get_args(mrb, "SS", &key, &func);
      mrb_get_args(mrb, "oo", &obj1, &obj2);
      if (mrb_symbol_p(obj1)) {
 			
@@ -84,14 +83,15 @@ mrb_mg_local_set_key(mrb_state *mrb, mrb_value self)
      int ret;
 
      mrb_get_args(mrb, "SS", &key, &func);
-     ret = dobindkey(curbp->b_modes[curbp->b_nmodes]->p_map, RSTRING_PTR(func), RSTRING_PTR(key));
+     ret = dobindkey(curbp->b_modes[curbp->b_nmodes]->p_map,
+		     RSTRING_PTR(func), RSTRING_PTR(key));
      return mrb_fixnum_value(ret);
 }
 
 
 void mrb_keymap_init(mrb_state *mrb)
 {
-     struct RClass *mode, *mg;
+     struct RClass *mg;
      mrb_value keymap_list;
 
      maps = NULL;

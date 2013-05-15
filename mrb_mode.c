@@ -322,9 +322,6 @@ mrb_add_mode(mrb_state *mrb, mrb_value self)
      mode_list = mrb_gv_get(mrb, mrb_intern(mrb, "$mg_mode_list"));
      mrb_hash_set(mrb, mode_list, mrb_str_new_cstr(mrb, mode->mode_name),
 		  mode_obj);
-//		  mrb_obj_value(Data_Wrap_Struct(mrb, mrb->object_class, 
-//						 &mrb_mode_data_type, mode)));
-//     mrb_field_write_barrier(mrb, mode_lsit, mode
      return self;
 }
 

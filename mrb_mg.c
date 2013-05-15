@@ -28,7 +28,6 @@
 
 mrb_state *mrb;
 
-
 mrb_value
 mrb_mg_debug_log(mrb_state *mrb, mrb_value self)
 {
@@ -38,14 +37,6 @@ mrb_mg_debug_log(mrb_state *mrb, mrb_value self)
      cstr = strndup(RSTRING_PTR(value), RSTRING_LEN(value));
      fprintf(stderr, "[debug]%s\n", cstr);
      return self;
-}
-
-mrb_value
-mrb_mg_extend(mrb_state *mrb, mrb_value self)
-{
-    mrb_value extend_str;
-    mrb_get_args(mrb, "S", &extend_str);
-    return mrb_fixnum_value(excline(RSTRING_PTR(extend_str)));
 }
 
 mrb_value
@@ -121,18 +112,6 @@ mrb_mg_current_position(mrb_state *mrb, mrb_value self)
      return cursor_a;
 }
 
-mrb_value
-mrb_mg_dired_backup_unflag(mrb_state *mrb, mrb_value self)
-{
-     PF func;
-     mrb_value value;
-     mrb_get_args(mrb, "o", &value);
-     func = name_function("dired-backup-unflag");
-     (*func)(0, mrb_type(value));
-     return mrb_nil_value();
-}
-
-
 int
 mrb_mg_load(char *fname)
 {
@@ -170,7 +149,6 @@ mrb_mg_load(char *fname)
 static mrb_value
 mrb_mg_eval_string(mrb_state *mrb, const char *str, int len)
 {
-     mrb_value ret;
      mrbc_context* cxt;
 
      cxt = curbp->b_mrb_cxt;
@@ -232,7 +210,7 @@ mrb_mg_evalexpr(char *line)
      mrb_value ret, ret_str;
      int ai;
      ai = mrb_gc_arena_save(mrb);
-	fprintf(stderr, "line = %s\n", line);
+
      ret = mrb_mg_eval_string(mrb, line, strlen(line));
      if (!mrb->exc) {
 	  ret_str = mrb_funcall(mrb, ret, "to_s", 0);
@@ -341,29 +319,6 @@ mrb_mg_eval_region(int f, int n)
 	       
 }
 
-/* match.c */
-mrb_value
-mrb_mg_showmatch(mrb_state *mrb, mrb_value self)
-{
-     mrb_value f, n;
-     int ret;
-     mrb_get_args(mrb, "oo", &f, &n);
-     ret = showmatch(mrb_fixnum(f), mrb_fixnum(n));
-     return mrb_fixnum_value(ret);
-}
-
-/* random.c */
-mrb_value
-mrb_mg_indent(mrb_state *mrb, mrb_value self)
-{
-     mrb_value n;
-     int ret;
-
-     mrb_get_args(mrb, "o", &n);
-     ret = indent(FFOTHARG, mrb_fixnum(n));
-     return mrb_fixnum_value(ret);
-}
-
 void
 mrb_mg_init()
 {
@@ -373,14 +328,8 @@ mrb_mg_init()
 
     mg = mrb_define_module(mrb, "MG");
 
-    mrb_define_module_function(mrb, mg, "dired_backup_unflag=", 
-			       mrb_mg_dired_backup_unflag, ARGS_REQ(1));
-
     mrb_define_module_function(mrb, mg, "debug_log", 
 			       mrb_mg_debug_log, ARGS_REQ(1));
-
-//    mrb_define_module_function(mrb, mg, "extend",
-//                               mrb_mg_extend, ARGS_REQ(1));
 
     mrb_define_module_function(mrb, mg, "method_missing",
 			       mrb_mg_method_missing, ARGS_ANY());
@@ -391,14 +340,6 @@ mrb_mg_init()
     /* current_position */
     mrb_define_module_function(mrb, mg, "current_position",
 			       mrb_mg_current_position, ARGS_NONE());
-
-    /* match.c */
-    mrb_define_module_function(mrb, mg, "showmatch",
-			       mrb_mg_showmatch, ARGS_REQ(2));
-
-    /* random.c */
-    mrb_define_module_function(mrb, mg, "indent",
-			       mrb_mg_indent, ARGS_REQ(1));
 
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
