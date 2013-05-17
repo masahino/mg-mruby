@@ -146,6 +146,19 @@ mrb_mg_load(char *fname)
      return FALSE;
 }
 
+mrb_value
+mrb_mg_load_file(mrb_state *mrb, mrb_value self)
+{
+     mrb_value fname;
+     int ret;
+
+     mrb_get_args(mrb, "S", &fname);
+     ret = mrb_mg_load(RSTRING_PTR(fname));
+     if (ret == TRUE)
+	  return mrb_true_value();
+     return mrb_false_value();
+}
+
 static mrb_value
 mrb_mg_eval_string(mrb_state *mrb, const char *str, int len)
 {
@@ -341,6 +354,8 @@ mrb_mg_init()
     mrb_define_module_function(mrb, mg, "current_position",
 			       mrb_mg_current_position, ARGS_NONE());
 
+    mrb_define_module_function(mrb, mg, "load",
+			       mrb_mg_load_file, ARGS_REQ(1));
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
 
