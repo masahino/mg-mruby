@@ -868,7 +868,26 @@ modeline(struct mgwin *wp)
 	vscreen[n]->v_flag |= (VFCHG | VFHBAD);	/* Recompute, display.	 */
 	vtmove(n, 0);				/* Seek to right line.	 */
 	bp = wp->w_bufp;
+#ifdef UTF8
+	switch(bp->b_encoding[0]) {
+	case 'I':
+	     vtputc('J');
+	     break;
+	case 'E':
+	     vtputc('E');
+	     break;
+	case 'S':
+	     vtputc('S');
+	     break;
+	case 'U':
+	     vtputc('U');
+	     break;
+	default:
+	     vtputc('-');
+	}
+#else
 	vtputc('-');
+#endif /* UTF8 */
 	vtputc('-');
 	if ((bp->b_flag & BFREADONLY) != 0) {
 		vtputc('%');
