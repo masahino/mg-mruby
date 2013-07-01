@@ -868,6 +868,7 @@ modeline(struct mgwin *wp)
 	vscreen[n]->v_flag |= (VFCHG | VFHBAD);	/* Recompute, display.	 */
 	vtmove(n, 0);				/* Seek to right line.	 */
 	bp = wp->w_bufp;
+	vtputc('-');
 #ifdef UTF8
 	switch(bp->b_encoding[0]) {
 	case 'I':
@@ -888,7 +889,6 @@ modeline(struct mgwin *wp)
 #else
 	vtputc('-');
 #endif /* UTF8 */
-	vtputc('-');
 	if ((bp->b_flag & BFREADONLY) != 0) {
 		vtputc('%');
 		if ((bp->b_flag & BFCHG) != 0)
