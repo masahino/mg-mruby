@@ -252,7 +252,8 @@ mrb_mg_evalbuffer(int f, int n)
 	  buf_str = mrb_str_cat2(mrb, buf_str, "\n");
      }
      mrb->exc = 0;
-     ret = mrb_load_nstring(mrb, RSTRING_PTR(buf_str), RSTRING_LEN(buf_str));
+     ret = mrb_load_nstring(mrb, RSTRING_PTR(buf_str),
+				RSTRING_LEN(buf_str));
      if (mrb->exc) {
 	  mrb_value obj;
 	  obj = mrb_obj_value(mrb->exc);
@@ -365,6 +366,7 @@ mrb_mg_init()
     mrb_autoexec_init(mrb);
     mrb_buffer_init(mrb);
     mrb_keymap_init(mrb);
+    mrb_command_init(mrb);
 
     funmap_add(mrb_mg_eval_last_exp, "eval-last-exp");
     funmap_add(mrb_mg_eval_print_last_exp, "eval-print-last-exp");

@@ -548,6 +548,9 @@ extend(int f, int n)
 {
 	PF	 funct;
 	char	 xname[NXNAME], *bufp;
+#ifdef MRUBY
+	mrb_value callback;
+#endif /* MRUBY */
 
 	if (!(f & FFARG))
 		bufp = eread("M-x ", xname, NXNAME, EFNEW | EFFUNC);
@@ -565,6 +568,11 @@ extend(int f, int n)
 			maclcur->l_fp = lp->l_fp;
 			free(lp);
 		}
+#ifdef MRUBY
+		if (!mrb_nil_p(callback = name_function_mrb_block(bufp))) {
+			return mrb_command_callback(f, n, callback);
+		}
+#endif /* MRUBY */
 		return ((*funct)(f, n));
 	}
 	ewprintf("[No match]");

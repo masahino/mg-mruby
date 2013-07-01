@@ -6,6 +6,11 @@
 #include "kbd.h"
 #include "funmap.h"
 
+#ifdef MRUBY
+#include "mrb_mg.h"
+#include "mrb_command.h"
+#endif /* MRUBY */
+
 /*
  * If the function is NULL, it must be listed with the
  * same name in the map_table.
@@ -14,6 +19,9 @@
 struct funmap {
 	PF		 fn_funct;
 	const		 char *fn_name;
+#ifdef MRUBY
+	mrb_value        fn_callback;
+#endif /* MRUBY */      
 	struct funmap	*fn_next;
 };
 
@@ -227,6 +235,36 @@ funmap_add(PF fun, const char *fname)
 	return (TRUE);
 }
 
+#ifdef MRUBY
+int
+funmap_add_mrb(mrb_value callback, const char *fname)
+{
+	struct funmap *fn;
+
+/* already exists? */
+	for (fn = funs; fn != NULL; fn = fn->fn_next) {
+		if (strcmp(fn->fn_name, fname) == 0) {
+			fn->fn_funct = &mrb_command_function;
+			fn->fn_name = fname;
+			fn->fn_callback = callback;
+			return (TRUE);
+		}
+	}
+
+	if ((fn = malloc(sizeof(*fn))) == NULL) {
+		return (FALSE);
+	}
+
+	fn->fn_funct = &mrb_command_function;
+	fn->fn_name = fname;
+	fn->fn_callback = callback;
+	fn->fn_next = funs;
+
+	funs = fn;
+	return (TRUE);
+
+}
+#endif /* MRUBY */
 /*
  * Translate from function name to function pointer.
  */
@@ -241,6 +279,21 @@ name_function(const char *fname)
 	}
 	return (NULL);
 }
+
+#ifdef MRUBY
+mrb_value
+name_function_mrb_block(const char *fname)
+{
+	struct funmap *fn;
+
+	for (fn = funs; fn != NULL; fn = fn->fn_next) {
+		if (strcmp(fn->fn_name, fname) == 0)
+			return (fn->fn_callback);
+	}
+	return mrb_nil_value();
+
+}
+#endif /* MRUBY */
 
 const char *
 function_name(PF fun)
