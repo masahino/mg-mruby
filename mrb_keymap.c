@@ -39,8 +39,8 @@ mrb_mg_set_key(mrb_state *mrb, mrb_value self, KEYMAP *map)
 	  } 
      } else {
 	  if (argc == 1) {
-	       keymap_list = mrb_gv_get(mrb, 
-					mrb_intern(mrb, "$mg_keymap_list"));
+	       keymap_list = mrb_cv_get(mrb, self,
+					mrb_intern(mrb, "@@keymap_list"));
 	       if (!mrb_nil_p(keymap_list)) {
 		    mrb_hash_set(mrb, keymap_list, argv[0], argv[0]);
 		    return mrb_true_value();
@@ -103,6 +103,6 @@ void mrb_keymap_init(mrb_state *mrb)
      mrb_define_module_function(mrb, mg, "local_set_key",
 			       mrb_mg_local_set_key, MRB_ARGS_REQ(2));
      keymap_list = mrb_hash_new(mrb);
-     mrb_gv_set(mrb, mrb_intern(mrb, "$mg_keymap_list"), keymap_list);
+     mrb_mod_cv_set(mrb, mg, mrb_intern(mrb, "@@keymap_list"), keymap_list);
      
 }
