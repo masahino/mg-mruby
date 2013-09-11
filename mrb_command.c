@@ -37,7 +37,7 @@ mrb_add_command(mrb_state *mrb, mrb_value self)
     mrb_value command_name, block, command_list;
     mrb_get_args(mrb, "&S", &block, &command_name);
 
-    command_list = mrb_cv_get(mrb, self, mrb_intern(mrb, "@@mode_list"));
+    command_list = mrb_cv_get(mrb, self, mrb_intern(mrb, "@@command_list"));
     
     funmap_add_mrb(block, RSTRING_PTR(command_name));
     mrb_hash_set(mrb, command_list, command_name, block);

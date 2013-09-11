@@ -9,6 +9,7 @@
 #include "def.h"
 #ifdef MRUBY
 #include "mrb_autoexec.h"
+#include "mrb_hook.h"
 #endif /* MRUBY */
 
 #include <sys/stat.h>
@@ -648,6 +649,10 @@ int
 writeout(FILE ** ffp, struct buffer *bp, char *fn)
 {
 	int	 s;
+
+#ifdef MRUBY
+	mrb_hook_callback("write-file-hooks", bp);
+#endif /* MRUBY */
 
 	/* open writes message */
 	if ((s = ffwopen(ffp, fn, bp)) != FIOSUC)

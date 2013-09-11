@@ -28,6 +28,12 @@ mrb_buffer_free(mrb_state *mrb, void *ptr)
 static struct mrb_data_type mrb_buffer_type = { "Buffer", mrb_buffer_free };
 
 mrb_value
+mrb_buffer_obj_value(mrb_state *mrb, struct RClass *class, struct buffer *bp)
+{
+    return mrb_obj_value(Data_Wrap_Struct(mrb, class, &mrb_buffer_type, bp));
+}
+
+mrb_value
 mrb_buffer_get_name(mrb_state *mrb, mrb_value self)
 {
      struct buffer *bp;

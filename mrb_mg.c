@@ -25,6 +25,7 @@
 #include "mrb_autoexec.h"
 #include "mrb_buffer.h"
 #include "mrb_keymap.h"
+#include "mrb_hook.h"
 
 mrb_state *mrb;
 
@@ -382,6 +383,7 @@ mrb_mg_init()
     mrb_buffer_init(mrb);
     mrb_keymap_init(mrb);
     mrb_command_init(mrb);
+    mrb_hook_init(mrb);
 
     funmap_add(mrb_mg_eval_last_exp, "eval-last-exp");
     funmap_add(mrb_mg_eval_print_last_exp, "eval-print-last-exp");
