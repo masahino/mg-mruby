@@ -23,6 +23,11 @@
 #include "kbd.h"
 #include "pathnames.h"
 
+#ifdef ICONV
+#include <iconv.h>
+#include <errno.h>
+#endif /* ICONV */
+
 static char *bkuplocation(const char *);
 static int   bkupleavetmp(const char *);
 char	    *expandtilde(const char *);
@@ -154,9 +159,36 @@ ffputbuf(FILE *ffp, struct buffer *bp)
 {
 	struct line   *lp, *lpend;
 
+#ifdef ICONV
+	iconv_t cd;
+	cd = iconv_open(bp->b_encoding, "UTF-8");
+	if (cd == (iconv_t)(-1)) {
+	     if (errno != EINVAL) {
+		  ewprintf("iconv error %d", errno);
+	     } else {
+		  ewprintf("iconv:unsupported code");
+	     }
+	     return FIOERR;
+	}
+#endif /* ICONV */
+
 	lpend = bp->b_headp;
 	for (lp = lforw(lpend); lp != lpend; lp = lforw(lp)) {
+#ifdef ICONV
+	     char instr[1024], outstr[1024];
+	     size_t res, insize, outsize;
+	     char *outptr = outstr;
+	     char *inptr = instr;
+	     strncpy(instr, ltext(lp), llength(lp));
+	     insize = llength(lp);
+	     outsize = 1024;
+	     instr[insize] = '\0';
+	     res = iconv(cd, &inptr, &insize, &outptr, &outsize);
+	     *outptr = '\0';
+	     if (fwrite(outstr, 1, strlen(outstr), ffp) != strlen(outstr)) {
+#else 
 		if (fwrite(ltext(lp), 1, llength(lp), ffp) != llength(lp)) {
+#endif /* ICONV */
 			ewprintf("Write I/O error");
 			return (FIOERR);
 		}

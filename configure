@@ -268,6 +268,7 @@ extraobjs="$extraobjs utf8.o"
 # iconv
 note 'iconv.h'
 if [ -r /usr/include/iconv.h ]; then
+    add_inc ICONV
     extralibs="$extralibs -liconv"
 else
     for i in pkg local; do
@@ -275,6 +276,7 @@ else
 	    echo "Found in /usr/$i/include"
 	    extralibs="$extralibs -L/usr/$i/lib -liconv"
 	    extraflags="$extraflags -I/usr/$i/include"
+	    add_inc ICONV
 	    break
 	else
 	    false
