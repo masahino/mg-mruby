@@ -7,6 +7,10 @@
  */
 #include "def.h"
 
+#ifndef NAME_MAX
+#define NAME_MAX MAXNAMLEN
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -518,7 +522,7 @@ make_file_list(char *buf)
 	 * SV files are fairly short.  For BSD, something more general would
 	 * be required.
 	 */
-	if (preflen > NFILEN - MAXNAMLEN)
+	if (preflen > NFILEN - NAME_MAX)
 		return (NULL);
 
 	/* loop over the specified directory, making up the list of files */
