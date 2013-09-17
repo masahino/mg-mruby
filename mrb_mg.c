@@ -346,6 +346,16 @@ mrb_mg_set_fileencodings(mrb_state *mrb, mrb_value self)
     return mrb_nil_value();
 }
 
+mrb_value
+mrb_mg_get_fileencodings(mrb_state *mrb, mrb_value self)
+{
+    mrb_value fileencodings;
+
+    fileencodings = mrb_cv_get(mrb, self, mrb_intern(mrb, "@@fileencodings"));
+
+    return fileencodings;
+}
+
 void
 mrb_mg_init()
 {
@@ -372,6 +382,8 @@ mrb_mg_init()
 			       mrb_mg_load_file, ARGS_REQ(1));
 
     mrb_define_module_function(mrb, mg, "fileencodings=", mrb_mg_set_fileencodings, ARGS_REQ(1));
+
+    mrb_define_module_function(mrb, mg, "get_fileencodings", mrb_mg_get_fileencodings, ARGS_NONE());
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
 
