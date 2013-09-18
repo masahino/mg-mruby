@@ -588,7 +588,11 @@ ldelete(RSIZE n, int kflag)
 					wp->w_marko = doto;
 			}
 		}
+#ifdef UTF8
+                n -= del_bytes;
+#else
 		n -= chunk;
+#endif /* UTF8 */
 	}
 	if (kchunk(sv, (RSIZE)len, kflag) != TRUE)
 		goto out;
