@@ -233,6 +233,11 @@ ffgetline(FILE *ffp, char *buf, int nbuf, int *nbytes)
 		ewprintf("File read error");
 		return (FIOERR);
 	}
+#ifdef UTF8
+	if (i > 0 && buf[i-1] == '\r') {
+	     i--;
+	}
+#endif /* UTF8 */
 	*nbytes = i;
 	return (c == EOF ? FIOEOF : FIOSUC);
 }
