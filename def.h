@@ -274,6 +274,7 @@ struct buffer {
 	int		 b_lines;	/* Number of lines in file	*/
 #ifdef UTF8
 	char             b_encoding[NLINE]; /* file encoding */
+        int              b_newline;
 #endif /* UTF8 */
 #ifdef MRUBY
         mrbc_context     *b_mrb_cxt;    
@@ -295,6 +296,14 @@ struct buffer {
 #define BFREADONLY  0x10		/* read only mode		 */
 #define BFDIRTY     0x20		/* Buffer was modified elsewhere */
 #define BFIGNDIRTY  0x40		/* Ignore modifications */
+
+#ifdef UTR8
+/* newline code */
+#define LF   1
+#define CRLF 2
+#define CR   3
+#endif 
+
 /*
  * This structure holds information about recent actions for the Undo command.
  */
