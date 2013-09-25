@@ -197,7 +197,23 @@ ffputbuf(FILE *ffp, struct buffer *bp)
 			return (FIOERR);
 		}
 		if (lforw(lp) != lpend)		/* no implied \n on last line */
+#ifdef UTF8
+		     switch(bp->b_newline) {
+		     case LF:
+			  putc('\n', ffp);
+			  break;
+		     case CRLF:
+			  putc('\r\n', ffp);
+			  break;
+		     case CR:
+			  putc('\r', ffp);
+			  break;
+		     default:
+			  putc('\n', ffp);
+		     }
+#else
 			putc('\n', ffp);
+#endif /* UTF8 */
 	}
 	/*
 	 * XXX should be variable controlled (once we have variables)

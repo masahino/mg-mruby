@@ -567,9 +567,9 @@ bnew(const char *bname)
 		return (NULL);
 	}
 #ifdef UTF8
-#endif /* UTF8 */
 	strcpy(bp->b_encoding, "UTF-8");
 	bp->b_newline = LF;
+#endif /* UTF8 */
 #ifdef MRUBY
 	bp->b_mrb_cxt = mrbc_context_new(mrb);
 #endif /* MRUBY */

@@ -297,12 +297,12 @@ struct buffer {
 #define BFDIRTY     0x20		/* Buffer was modified elsewhere */
 #define BFIGNDIRTY  0x40		/* Ignore modifications */
 
-#ifdef UTR8
+#ifdef UTF8
 /* newline code */
 #define LF   1
 #define CRLF 2
 #define CR   3
-#endif 
+#endif /* UTF8 */
 
 /*
  * This structure holds information about recent actions for the Undo command.
