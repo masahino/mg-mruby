@@ -160,7 +160,7 @@ mrb_auto_execute(mrb_state *mrb, mrb_value self)
 			   autoexec_name_str)) != TRUE)
 	 return mrb_fixnum_value(s);
 
-     autoexec_list = mrb_cv_get(mrb, self, mrb_intern(mrb, "@@autoexec_list"));
+     autoexec_list = mrb_cv_get(mrb, self, mrb_intern_cstr(mrb, "@@autoexec_list"));
      mrb_hash_set(mrb, autoexec_list, pat, block);
 		  
      return mrb_true_value();
@@ -178,5 +178,5 @@ mrb_autoexec_init(mrb_state *mrb)
 			       mrb_auto_execute, ARGS_REQ(2));
 
     autoexec_list = mrb_hash_new(mrb);
-    mrb_mod_cv_set(mrb, mg, mrb_intern(mrb, "@@autoexec_list"), autoexec_list);
+    mrb_mod_cv_set(mrb, mg, mrb_intern_cstr(mrb, "@@autoexec_list"), autoexec_list);
 }

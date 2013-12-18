@@ -209,7 +209,7 @@ mrb_mode_callback(int f, int n)
      int i, ai;
      char *tmp_s;
 
-     mode_list = mrb_mod_cv_get(mrb, mrb_class_get(mrb, "MG"), mrb_intern(mrb, "@@mode_list"));
+     mode_list = mrb_mod_cv_get(mrb, mrb_class_get(mrb, "MG"), mrb_intern_cstr(mrb, "@@mode_list"));
 
      cur_map = curbp->b_modes[curbp->b_nmodes];
      ai = mrb_gc_arena_save(mrb);
@@ -260,7 +260,7 @@ mrb_mode_define_key(mrb_state *mrb, mrb_value self)
      mrb_get_args(mrb, "H", &map_h);
      mode = (struct mrb_mode *)mrb_data_get_ptr(mrb, self, &mrb_mode_data_type);
      mode->callback_h = map_h;
-     mrb_iv_set(mrb, self, mrb_intern(mrb, "keymap"), map_h);
+     mrb_iv_set(mrb, self, mrb_intern_cstr(mrb, "keymap"), map_h);
      DATA_PTR(self) = mode;
      return self;
 }
@@ -318,7 +318,7 @@ mrb_add_mode(mrb_state *mrb, mrb_value self)
      funmap_add(mrb_mode_funcs[mrb_mode_num], mode_name_str);
      mrb_mode_num++;
      
-     mode_list = mrb_cv_get(mrb, self, mrb_intern(mrb, "@@mode_list"));
+     mode_list = mrb_cv_get(mrb, self, mrb_intern_cstr(mrb, "@@mode_list"));
      mrb_hash_set(mrb, mode_list, mrb_str_new_cstr(mrb, mode->mode_name),
 		  mode_obj);
      return self;
@@ -343,6 +343,6 @@ void mrb_mode_init(mrb_state *mrb)
      mrb_define_module_function(mrb, mg, "add_mode",
 				mrb_add_mode, ARGS_REQ(1));
      mode_list = mrb_hash_new(mrb);
-     mrb_mod_cv_set(mrb, mg, mrb_intern(mrb, "@@mode_list"), mode_list);
+     mrb_mod_cv_set(mrb, mg, mrb_intern_cstr(mrb, "@@mode_list"), mode_list);
      
 }

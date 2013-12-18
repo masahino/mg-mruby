@@ -341,7 +341,7 @@ mrb_mg_set_fileencodings(mrb_state *mrb, mrb_value self)
 
     mrb_get_args(mrb, "A", &fileencodings);
 
-    mrb_cv_set(mrb, self, mrb_intern(mrb, "@@fileencodings"), fileencodings);
+    mrb_cv_set(mrb, self, mrb_intern_cstr(mrb, "@@fileencodings"), fileencodings);
 
     return mrb_nil_value();
 }
@@ -351,7 +351,7 @@ mrb_mg_get_fileencodings(mrb_state *mrb, mrb_value self)
 {
     mrb_value fileencodings;
 
-    fileencodings = mrb_cv_get(mrb, self, mrb_intern(mrb, "@@fileencodings"));
+    fileencodings = mrb_cv_get(mrb, self, mrb_intern_cstr(mrb, "@@fileencodings"));
 
     return fileencodings;
 }
@@ -387,7 +387,7 @@ mrb_mg_init()
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
 
-    mrb_mod_cv_set(mrb, mg, mrb_intern(mrb, "@@fileencodings"), mrb_ary_new(mrb));
+    mrb_mod_cv_set(mrb, mg, mrb_intern_cstr(mrb, "@@fileencodings"), mrb_ary_new(mrb));
 
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
