@@ -108,7 +108,7 @@ mrb_buffer_init(mrb_state *mrb)
 {
     struct RClass *mg, *buffer;
 
-    mg = mrb_class_get(mrb, "MG");
+    mg = mrb_module_get(mrb, "MG");
     buffer = mrb_define_class_under(mrb, mg, "Buffer", mrb->object_class);
     MRB_SET_INSTANCE_TT(buffer, MRB_TT_DATA);
     mrb_define_class_method(mrb, buffer, "current", mrb_buffer_get_current,

@@ -95,7 +95,7 @@ void mrb_keymap_init(mrb_state *mrb)
      mrb_value keymap_list;
 
      maps = NULL;
-     mg = mrb_class_get(mrb, "MG");
+     mg = mrb_module_get(mrb, "MG");
      
      mrb_define_module_function(mrb, mg, "global_set_key",
 				mrb_mg_global_set_key, MRB_ARGS_ANY());

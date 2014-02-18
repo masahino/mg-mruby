@@ -172,7 +172,7 @@ mrb_autoexec_init(mrb_state *mrb)
     struct RClass *mg;
     mrb_value autoexec_list;
 
-    mg = mrb_class_get(mrb, "MG");
+    mg = mrb_module_get(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "auto_execute",
 			       mrb_auto_execute, ARGS_REQ(2));

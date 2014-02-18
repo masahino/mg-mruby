@@ -20,10 +20,10 @@ mrb_hook_callback(char *hook_name, struct buffer *bp)
     mrb_value hook_list, hook_a, buffer_obj, block;
     mrb_int i;
 
-    hook_list = mrb_mod_cv_get(mrb, mrb_class_get(mrb, "MG"), mrb_intern_cstr(mrb, "@@hook_list"));
+    hook_list = mrb_mod_cv_get(mrb, mrb_module_get(mrb, "MG"), mrb_intern_cstr(mrb, "@@hook_list"));
     hook_a = mrb_hash_get(mrb, hook_list, mrb_str_new_cstr(mrb, hook_name));
 
-    buffer_obj =  mrb_buffer_obj_value(mrb, mrb_class_get(mrb, "MG"), bp);
+    buffer_obj =  mrb_buffer_obj_value(mrb, mrb_module_get(mrb, "MG"), bp);
 
     for(i = 0; i < mrb_ary_len(mrb, hook_a); i++) {
         block = mrb_ary_ref(mrb, hook_a, i);
@@ -56,7 +56,7 @@ void mrb_hook_init(mrb_state *mrb)
      struct RClass *mg;
      mrb_value hook_list;
 
-     mg = mrb_class_get(mrb, "MG");
+     mg = mrb_module_get(mrb, "MG");
      
      mrb_define_module_function(mrb, mg, "add_hook",
 				mrb_add_hook, ARGS_REQ(2));

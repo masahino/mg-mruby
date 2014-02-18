@@ -209,7 +209,7 @@ mrb_mode_callback(int f, int n)
      int i, ai;
      char *tmp_s;
 
-     mode_list = mrb_mod_cv_get(mrb, mrb_class_get(mrb, "MG"), mrb_intern_cstr(mrb, "@@mode_list"));
+     mode_list = mrb_mod_cv_get(mrb, mrb_module_get(mrb, "MG"), mrb_intern_cstr(mrb, "@@mode_list"));
 
      cur_map = curbp->b_modes[curbp->b_nmodes];
      ai = mrb_gc_arena_save(mrb);
@@ -331,7 +331,7 @@ void mrb_mode_init(mrb_state *mrb)
      mrb_value mode_list;
 
      maps = NULL;
-     mg = mrb_class_get(mrb, "MG");
+     mg = mrb_module_get(mrb, "MG");
      
      mode = mrb_define_class_under(mrb, mg, "Mode", mrb->object_class);
      MRB_SET_INSTANCE_TT(mode, MRB_TT_DATA);

@@ -62,7 +62,7 @@ mrb_extend_init(mrb_state *mrb)
 {
     struct RClass *mg;
 
-    mg = mrb_class_get(mrb, "MG");
+    mg = mrb_module_get(mrb, "MG");
 
     mrb_define_module_function(mrb, mg, "insert",
 			       mrb_mg_insert, ARGS_REQ(1));

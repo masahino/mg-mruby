@@ -51,7 +51,7 @@ void mrb_command_init(mrb_state *mrb)
      struct RClass *mg;
      mrb_value command_list;
 
-     mg = mrb_class_get(mrb, "MG");
+     mg = mrb_module_get(mrb, "MG");
      
      mrb_define_module_function(mrb, mg, "add_command",
 				mrb_add_command, ARGS_REQ(2));
