@@ -26,6 +26,7 @@
 
 #ifdef MRUBY 
 #include "mrb_mg.h"
+#include "mrb_command.h"
 #endif /* MRUBY */
 
 static int	 remap(KEYMAP *, int, PF, KEYMAP *);

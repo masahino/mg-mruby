@@ -20,6 +20,7 @@
 #include "mruby/dump.h"
 
 #include "mrb_mg.h"
+#include "mrb_command.h"
 #include "mrb_mode.h"
 #include "mrb_extend.h"
 #include "mrb_buffer.h"

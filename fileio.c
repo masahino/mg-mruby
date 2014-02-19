@@ -203,7 +203,8 @@ ffputbuf(FILE *ffp, struct buffer *bp)
 			  putc('\n', ffp);
 			  break;
 		     case CRLF:
-			  putc('\r\n', ffp);
+			  putc('\r', ffp);
+			  putc('\n', ffp);
 			  break;
 		     case CR:
 			  putc('\r', ffp);
