@@ -287,7 +287,7 @@ fi
 # MRUBY
 add_inc MRUBY
 extraflags="$extraflags -I./mruby/include"
-extraobjs="$extraobjs mrb_mg.o mrb_mode.o mrb_extend.o mrb_autoexec.o mrb_buffer.o mrb_keymap.o mrb_command.o mrb_hook.o"
+extraobjs="$extraobjs mrb_mg.o mrb_mode.o mrb_extend.o mrb_buffer.o mrb_keymap.o mrb_command.o mrb_hook.o"
 extraobjs="$extraobjs mruby/build/host/lib/libmruby.a"
 
 rm testfile*

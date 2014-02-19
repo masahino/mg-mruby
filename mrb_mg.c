@@ -22,7 +22,6 @@
 #include "mrb_mg.h"
 #include "mrb_mode.h"
 #include "mrb_extend.h"
-#include "mrb_autoexec.h"
 #include "mrb_buffer.h"
 #include "mrb_keymap.h"
 #include "mrb_hook.h"
@@ -391,7 +390,6 @@ mrb_mg_init()
 
     mrb_mode_init(mrb);
     mrb_extend_init(mrb);
-    mrb_autoexec_init(mrb);
     mrb_buffer_init(mrb);
     mrb_keymap_init(mrb);
     mrb_command_init(mrb);

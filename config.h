@@ -13,4 +13,5 @@
 #define HAVE_NOSTRTONUM
 #define HAVE_ST_MTIMESPEC
 #define UTF8
+#define ICONV
 #define MRUBY

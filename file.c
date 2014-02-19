@@ -8,7 +8,6 @@
 
 #include "def.h"
 #ifdef MRUBY
-#include "mrb_autoexec.h"
 #include "mrb_hook.h"
 #endif /* MRUBY */
 
