@@ -61,6 +61,7 @@ void mrb_hook_init(mrb_state *mrb)
      mrb_define_module_function(mrb, mg, "add_hook",
 				mrb_add_hook, ARGS_REQ(2));
      hook_list = mrb_hash_new(mrb);
+     mrb_hash_set(mrb, hook_list, mrb_str_new_cstr(mrb, "find-file-hooks"), mrb_ary_new(mrb));
      mrb_hash_set(mrb, hook_list, mrb_str_new_cstr(mrb, "write-file-hooks"), mrb_ary_new(mrb));
      mrb_hash_set(mrb, hook_list, mrb_str_new_cstr(mrb, "after-save-hook"), mrb_ary_new(mrb));
 

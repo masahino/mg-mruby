@@ -232,6 +232,10 @@ readin(char *fname)
 		}
 	}
 
+#ifdef MRUBY
+	mrb_hook_callback("find-file-hooks", curbp);
+#endif /* MRUBY */
+
 	/*
 	 * Call auto-executing function if we need to.
 	 */
