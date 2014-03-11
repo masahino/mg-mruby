@@ -24,6 +24,10 @@
 
 #include <ctype.h>
 
+#ifdef UTF8
+#include "utf8.h"
+#endif /* UTF8 */
+
 #ifdef MRUBY 
 #include "mrb_mg.h"
 #endif /* MRUBY */
@@ -46,15 +50,38 @@ int
 insert(int f, int n)
 {
 	char	 buf[128], *bufp, *cp;
+#ifdef UTF8
+	int count, size;
+#else
 	int	 count, c;
+#endif /* UTF8 */
 
 	if (inmacro) {
 		while (--n >= 0) {
+#ifdef UTF8
+		     count = 0;
+		     while (count < maclcur->l_used) {
+			  if (maclcur->l_text[count] == '\n') {
+			       if (lnewline() != TRUE) {
+				    return FALSE;
+			       }
+			       count++;
+			     } else {
+			       size = utf8_bytes(maclcur->l_text, count, 1);
+			       if (linsert_str(&(maclcur->l_text[count]),
+					       size) != TRUE) {
+				    return FALSE;
+			       }
+			       count += size;
+			  }
+		     }
+#else
 			for (count = 0; count < maclcur->l_used; count++) {
 				if ((((c = maclcur->l_text[count]) == '\n')
 				    ? lnewline() : linsert(1, c)) != TRUE)
 					return (FALSE);
 			}
+#endif /* UTF8 */
 		}
 		maclcur = maclcur->l_fp;
 		return (TRUE);
@@ -548,9 +575,6 @@ extend(int f, int n)
 {
 	PF	 funct;
 	char	 xname[NXNAME], *bufp;
-#ifdef MRUBY
-	mrb_value callback;
-#endif /* MRUBY */
 
 	if (!(f & FFARG))
 		bufp = eread("M-x ", xname, NXNAME, EFNEW | EFFUNC);
@@ -568,11 +592,6 @@ extend(int f, int n)
 			maclcur->l_fp = lp->l_fp;
 			free(lp);
 		}
-#ifdef MRUBY
-		if (!mrb_nil_p(callback = name_function_mrb_block(bufp))) {
-			return mrb_command_callback(f, n, callback);
-		}
-#endif /* MRUBY */
 		return ((*funct)(f, n));
 	}
 	ewprintf("[No match]");

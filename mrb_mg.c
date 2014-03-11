@@ -42,11 +42,10 @@ mrb_mg_debug_log(mrb_state *mrb, mrb_value self)
 mrb_value
 mrb_mg_method_missing(mrb_state *mrb, mrb_value self)
 {
-     mrb_value name, *a;
+     mrb_value name, *a, tmp_str;
      int alen, i;
      char *command_str, *tmp;
      mrb_get_args(mrb, "o*", &name, &a, &alen);
-     
      command_str = strdup(RSTRING_PTR(mrb_sym2str(mrb, mrb_symbol(name))));
      tmp = command_str;
      while (*tmp) {
@@ -57,11 +56,14 @@ mrb_mg_method_missing(mrb_state *mrb, mrb_value self)
      for (i = 0; i < alen; i++) {
 	  switch (mrb_type(a[i])) {
 	  case MRB_TT_STRING:
+	       tmp_str = mrb_funcall(mrb, a[i], "gsub", 2,
+				 mrb_str_new_cstr(mrb, "\""),
+				 mrb_str_new_cstr(mrb, "\\\""));
 	       command_str = realloc(command_str, 
 				     strlen(command_str) +
-				     RSTRING_LEN(a[i]) + 4);
+				     RSTRING_LEN(tmp_str) + 4);
 	       strcat(command_str, " \"");
-	       strcat(command_str, RSTRING_PTR(a[i]));
+	       strcat(command_str, RSTRING_PTR(tmp_str));
 	       strcat(command_str, "\"");
 	       break;
 	  case MRB_TT_SYMBOL:
@@ -138,6 +140,7 @@ mrb_mg_load(char *fname)
 		   obj = mrb_obj_value(mrb->exc);
 		   ewprintf("%s", 
 			    RSTRING_PTR(mrb_funcall(mrb, obj, "inspect", 0)));
+		   mrb->exc = 0;
 		   return FALSE;
 	      }
 	  }
@@ -184,8 +187,9 @@ mrb_mg_eval_last_exp(int f, int n)
 	  mrb_value obj;
 	  obj = mrb_obj_value(mrb->exc);
 	  ret_str = mrb_funcall(mrb, obj, "inspect", 0);
+	  mrb->exc = 0;
      }
-     ewprintf("%s", (RSTRING_PTR(ret_str)));
+     ewprintf("%s", RSTRING_PTR(ret_str));
      mrb_gc_arena_restore(mrb, ai);
      return TRUE;
 }
@@ -385,6 +389,8 @@ mrb_mg_init()
     mrb_define_module_function(mrb, mg, "get_fileencodings", mrb_mg_get_fileencodings, ARGS_NONE());
     /* const */
     mrb_define_const(mrb, mg, "FFRAND", mrb_fixnum_value(FFRAND));
+    mrb_define_const(mrb, mg, "TRUE", mrb_fixnum_value(TRUE));
+    mrb_define_const(mrb, mg, "FALSE", mrb_fixnum_value(FALSE));
 
     mrb_mod_cv_set(mrb, mg, mrb_intern_cstr(mrb, "@@fileencodings"), mrb_ary_new(mrb));
 
@@ -392,7 +398,6 @@ mrb_mg_init()
     mrb_extend_init(mrb);
     mrb_buffer_init(mrb);
     mrb_keymap_init(mrb);
-    mrb_command_init(mrb);
     mrb_hook_init(mrb);
 
     funmap_add(mrb_mg_eval_last_exp, "eval-last-exp");

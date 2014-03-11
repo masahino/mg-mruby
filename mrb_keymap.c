@@ -22,6 +22,9 @@
 
 #include "mrb_mg.h"
 #include "mrb_keymap.h"
+#include "mrb_command.h"
+
+const static struct mrb_data_type mrb_keymap_type = { "Keymap", mrb_free };
 
 mrb_value
 mrb_mg_set_key(mrb_state *mrb, mrb_value self, KEYMAP *map)
@@ -88,19 +91,58 @@ mrb_mg_local_set_key(mrb_state *mrb, mrb_value self)
      return mrb_fixnum_value(ret);
 }
 
+mrb_value
+mrb_mg_keymap_initialize(mrb_state *mrb, mrb_value self)
+{
+     KEYMAP *keymap_data;
+     static PF key_array[] = {newline,};
+
+     keymap_data = (KEYMAP *)mrb_malloc(mrb, sizeof(KEYMAP));
+
+     keymap_data->map_num = 1;
+     keymap_data->map_max = 1;
+     keymap_data->map_default = rescan;
+     /* dummy setting */
+     keymap_data->map_element[0].k_base = CCHR('M');
+     keymap_data->map_element[0].k_num = CCHR('M');
+     keymap_data->map_element[0].k_funcp = key_array;
+     keymap_data->map_element[0].k_prefmap = NULL;
+     DATA_TYPE(self) = &mrb_keymap_type;
+     DATA_PTR(self) = keymap_data;
+     return self;
+}
+
+mrb_value
+mrb_mg_add_map(mrb_state *mrb, mrb_value self)
+{
+     mrb_value map_obj, mode_name;
+     KEYMAP *keymap_data;
+     
+     mrb_get_args(mrb, "oS", &map_obj, &mode_name);
+     keymap_data = DATA_PTR(map_obj);
+     maps_add(keymap_data, strdup(RSTRING_PTR(mode_name)));
+     return self;
+}
 
 void mrb_keymap_init(mrb_state *mrb)
 {
-     struct RClass *mg;
+     struct RClass *mg, *keymap;
      mrb_value keymap_list;
 
      maps = NULL;
      mg = mrb_module_get(mrb, "MG");
+
+     keymap = mrb_define_class_under(mrb, mg, "Keymap", mrb->object_class);
+     MRB_SET_INSTANCE_TT(keymap, MRB_TT_DATA);
+     mrb_define_method(mrb, keymap, "initialize", mrb_mg_keymap_initialize,
+		       ARGS_NONE());
      
-     mrb_define_module_function(mrb, mg, "global_set_key",
+     mrb_define_module_function(mrb, mg, "add_map",
+				mrb_mg_add_map, MRB_ARGS_REQ(2));
+     mrb_define_module_function(mrb, mg, "rglobal_set_key",
 				mrb_mg_global_set_key, MRB_ARGS_ANY());
 
-     mrb_define_module_function(mrb, mg, "local_set_key",
+     mrb_define_module_function(mrb, mg, "rlocal_set_key",
 			       mrb_mg_local_set_key, MRB_ARGS_REQ(2));
      keymap_list = mrb_hash_new(mrb);
      mrb_mod_cv_set(mrb, mg, mrb_intern_cstr(mrb, "@@keymap_list"), keymap_list);
