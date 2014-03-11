@@ -64,9 +64,9 @@ mrb_extend_init(mrb_state *mrb)
 
     mg = mrb_module_get(mrb, "MG");
 
-    mrb_define_module_function(mrb, mg, "insert",
+    mrb_define_module_function(mrb, mg, "mrb_insert",
 			       mrb_mg_insert, ARGS_REQ(1));
-    mrb_define_module_function(mrb, mg, "next_line",
+    mrb_define_module_function(mrb, mg, "mrb_next_line",
 			       mrb_mg_next_line, ARGS_OPT(1));
 }
 

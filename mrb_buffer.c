@@ -81,6 +81,16 @@ mrb_buffer_get_encoding(mrb_state *mrb, mrb_value self)
 }
 
 mrb_value
+mrb_buffer_count_lines_page(mrb_state *mrb, mrb_value self)
+{
+	struct buffer *bp;
+	bp = (struct buffer *)mrb_data_get_ptr(mrb, self, &mrb_buffer_type);
+	if (bp == NULL)
+		return mrb_nil_value();
+	return mrb_fixnum_value(bp->b_lines);
+}
+
+mrb_value
 mrb_buffer_initialize(mrb_state *mrb, mrb_value self)
 {
 	mrb_value mrb_buf_name;
@@ -121,4 +131,6 @@ mrb_buffer_init(mrb_state *mrb)
 		      ARGS_REQ(1));
     mrb_define_method(mrb, buffer, "get_encoding", mrb_buffer_get_encoding,
 			ARGS_NONE());
+    mrb_define_method(mrb, buffer, "count_lines_page",
+		      mrb_buffer_count_lines_page, ARGS_NONE());
 }
