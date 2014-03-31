@@ -55,11 +55,11 @@ main(int argc, char **argv)
 	struct buffer	*bp = NULL;
 
 #ifdef MRUBY
-//	mrb = mrb_open();
 	mrb_mg_init();
+	int noinitfile = 0;
 #endif /* MRUBY */
 
-	while ((o = getopt(argc, argv, "nf:")) != -1)
+	while ((o = getopt(argc, argv, "nf:q")) != -1)
 		switch (o) {
 		case 'n':
 			nobackups = 1;
@@ -70,6 +70,9 @@ main(int argc, char **argv)
 				    "initial function");
 			init_fcn_name = optarg;
 			break;
+		case 'q':
+		     noinitfile = 1;
+		     break;
 		default:
 			usage();
 		}
@@ -117,7 +120,7 @@ main(int argc, char **argv)
 
 	/* user startup file */
 #ifdef MRUBY
-	if ((cp = startupfile(NULL)) != NULL)
+	if (noinitfile == 0 && (cp = startupfile(NULL)) != NULL)
 		mrb_mg_load(cp);
 #else
 	if ((cp = startupfile(NULL)) != NULL)
