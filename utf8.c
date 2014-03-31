@@ -39,34 +39,33 @@ static struct KEYMAPE (1 + IMAPEXT) utf8map = {
 /* bytes */
 int utf8_bytes(char *line, int index, int counts)
 { 
-     unsigned char c;
+     unsigned char *p;
      int bytes = 0;
+     int total_bytes = 0;
      int i;
 
      if (line == NULL) {
 	  return 0;
      }
-     c = line[index];
+     p = (unsigned char*)line;
 
      for (i = 0; i < counts; i++) {
-	  if (0x01 <= c && c <= 0x7F) {
-	       bytes += 1;
-	       c = line[index+bytes];
-	  } else if (0xC0 <= c && c <= 0xDF) {
-	       bytes += 2;
-	       c = line[index+bytes];
-	  } else if (0xE0 <= c && c <= 0xEF) {
-	       bytes += 3;
-	       c = line[index+bytes];
+	  if (0x01 <= *p && *p <= 0x7F) {
+	       bytes = 1;
+	  } else if (0xC0 <= *p && *p <= 0xDF) {
+	       bytes = 2;
+	  } else if (0xE0 <= *p && *p <= 0xEF) {
+	       bytes = 3;
 //	  } else if (0x80 <= c && c <= 0x8F && index > 0) {
 //	       bytes += utf8_bytes(line, index - 1, 1);
 //	       c = line[index + bytes];
 	  } else {
-	       bytes += 1;
-	       c = line[index+bytes];
+	       bytes = 1;
 	  }
+	  total_bytes += bytes;
+	  p += bytes;
      }
-     return bytes;
+     return total_bytes;
 }
 
 /* num of chars */
