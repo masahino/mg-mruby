@@ -87,7 +87,14 @@ mrb_mg_method_missing(mrb_state *mrb, mrb_value self)
 mrb_value
 mrb_mg_buffer_string(mrb_state *mrb, mrb_value self)
 {
-     return mrb_str_new(mrb, ltext(curwp->w_dotp), llength(curwp->w_dotp));
+     struct line *lp, *lpend;
+     mrb_value str_ary = mrb_ary_new(mrb);
+
+     lpend = curbp->b_headp;
+     for (lp = lforw(lpend); lp != lpend; lp = lforw(lp)) {
+	  mrb_ary_push(mrb, str_ary, mrb_str_new_cstr(mrb, ltext(lp)));
+     }
+     return str_ary;
 }
 
 mrb_value
@@ -120,7 +127,7 @@ mrb_mg_load(char *fname)
 {
      FILE *f;
      mrb_value v;
-     
+
      if ((fname = adjustname(fname, TRUE)) == NULL) {
 	  /* just to be careful */
 	  return (FALSE);
