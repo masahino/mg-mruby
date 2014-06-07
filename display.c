@@ -869,26 +869,7 @@ modeline(struct mgwin *wp)
 	vtmove(n, 0);				/* Seek to right line.	 */
 	bp = wp->w_bufp;
 	vtputc('-');
-#ifdef UTF8
-	switch(bp->b_encoding[0]) {
-	case 'I':
-	     vtputc('J');
-	     break;
-	case 'E':
-	     vtputc('E');
-	     break;
-	case 'S':
-	     vtputc('S');
-	     break;
-	case 'U':
-	     vtputc('U');
-	     break;
-	default:
-	     vtputc('-');
-	}
-#else
 	vtputc('-');
-#endif /* UTF8 */
 	if ((bp->b_flag & BFREADONLY) != 0) {
 		vtputc('%');
 		if ((bp->b_flag & BFCHG) != 0)
@@ -907,6 +888,14 @@ modeline(struct mgwin *wp)
 	n += vtputs("Mg: ");
 	if (bp->b_bname[0] != '\0')
 		n += vtputs(&(bp->b_bname[0]));
+#ifdef UTF8
+	vtputc(' ');
+	vtputc('[');
+	if (bp->b_encoding[0] != '\0')
+	        n += vtputs(&(bp->b_encoding[0]));
+	vtputc(']');
+	n += 3;
+#endif /* UTF8 */
 	while (n < 42) {			/* Pad out with blanks.	 */
 		vtputc(' ');
 		++n;
