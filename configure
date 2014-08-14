@@ -287,12 +287,15 @@ fi
 # MRUBY
 add_inc MRUBY
 extraflags="$extraflags -I./mruby/include"
+extraldflags="$extraldflags -rdynamic \`mruby/bin/mruby-config --ldflags\`"
 extraobjs="$extraobjs mrb_mg.o mrb_mode.o mrb_extend.o mrb_buffer.o mrb_keymap.o mrb_hook.o"
-extraobjs="$extraobjs mruby/build/host/lib/libmruby.a mruby/build/libffi/host/libffi-3.0.13/lib/libffi.a"
+#extraobjs="$extraobjs mruby/build/host/lib/libmruby.a mruby/build/libffi/host/libffi-3.0.13/lib/libffi.a"
+extralibs="$extralibs \`mruby/bin/mruby-config --libs\`"
 
 rm testfile*
 
 sed -e "s|@extraflags@|$extraflags|" \
+    -e "s|@extraldflags@|$extraldflags|" \
     -e "s|@extralibs@|$extralibs|" \
     -e "s|@extraobjs@|$extraobjs|" \
     -e "s|@exe_ext@|$exe_ext|" \
