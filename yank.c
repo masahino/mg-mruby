@@ -166,9 +166,19 @@ killline(int f, int n)
 			if ((c = lgetc(curwp->w_dotp, i)) != ' ' && c != '\t')
 				break;
 		if (i == llength(curwp->w_dotp))
+#ifdef UTF8
+		     chunk = llength_utf8(curwp->w_dotp) -
+			  utf8_nlength(curwp->w_dotp->l_text, curwp->w_doto) + 1;
+#else
 			chunk = llength(curwp->w_dotp) - curwp->w_doto + 1;
+#endif /* UTF8 */
 		else {
+#ifdef UTF8
+		     chunk = llength_utf8(curwp->w_dotp) -
+			  utf8_nlength(curwp->w_dotp->l_text, curwp->w_doto);
+#else
 			chunk = llength(curwp->w_dotp) - curwp->w_doto;
+#endif /* UTF8 */
 			if (chunk == 0)
 				chunk = 1;
 		}
@@ -255,8 +265,10 @@ yank(int f, int n)
 	             size = utf8_bytes(tmp_str, 0, 1);
 	             i++;
 	             for (j = 1; j < size; j++) {
-	                 tmp_str[j] = kremove(i++);
+	                 tmp_str[j] = kremove(i);
+                         i++;
 	             }
+		     tmp_str[j] = '\0';
 	             linsert_str(tmp_str, size);
 	         }
 	     }

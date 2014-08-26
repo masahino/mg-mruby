@@ -589,7 +589,7 @@ ldelete(RSIZE n, int kflag)
 			}
 		}
 #ifdef UTF8
-                n -= del_bytes;
+                n -= chunk;
 #else
 		n -= chunk;
 #endif /* UTF8 */
